@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="text">#FFFFFFFF</color>
+    <color name="settings_bg">#FF000000</color>
+    <color name="segment_track">#FF2A2A2A</color>
+    <color name="segment_selected">#FF5E7783</color>
+    <color name="segment_text">#FFF2F2F2</color>
+    <color name="settings_title">#FFF2F2F2</color>
+    <color name="settings_help">#FFB4B2A9</color>
+    <color name="settings_divider">#FF3A3A38</color>
 </resources>

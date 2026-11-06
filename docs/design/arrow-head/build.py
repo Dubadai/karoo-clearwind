@@ -10,6 +10,7 @@ def data_url(p): return 'data:image/png;base64,' + base64.b64encode(p.read_bytes
 for name in ('mockup', 'preview'):
     html = (here / f'{name}.src.html').read_text()
     html = html.replace('/*__KAROO_DEVICE_JS__*/', (assets / 'karoo-device.js').read_text())
+    html = html.replace('/*__FIELD_JS__*/', (here.parent / 'field.js').read_text())
     html = html.replace('__FRAME__', data_url(assets / 'karoo-3-frame.png'))
     html = html.replace('__SCREEN__', data_url(here.parent / 'field' / 'device' / '05-arrow-under-header-light.png'))
     html = html.replace('__SCREEN_DARK__', data_url(here / 'device' / '04-a2-mono-dark.png'))

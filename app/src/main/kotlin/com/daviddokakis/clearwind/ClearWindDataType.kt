@@ -53,7 +53,7 @@ class ClearWindDataType(
             var shown: Key? = null
             while (isActive) {
                 val s = DemoData.apply(session.state.value)
-                val key = Key(s.arrowDeg?.let { (it / 2).roundToInt() }, s.speedText, s.kmh, s.arrowColour)
+                val key = Key(s.arrowDeg?.let { (it / 2).roundToInt() }, s.speedText, s.unit, s.arrowColour)
                 val since = SystemClock.elapsedRealtime() - lastRender
                 if ((key != shown && since >= MIN_GAP_MS) || since >= IDLE_REDRAW_MS) {
                     try {
@@ -92,7 +92,7 @@ class ClearWindDataType(
     private data class Key(
         val arrow: Int?,
         val speed: String,
-        val kmh: Boolean,
+        val unit: ClearWindState.WindUnit,
         val colour: ClearWindState.ArrowColour,
     )
 

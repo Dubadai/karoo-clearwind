@@ -113,7 +113,7 @@ object WindRenderer {
         val mid = ICON_TOP + ICON_PX / 2f
         val baseline = mid + capsPx / 2f
         drawWindIcon(c, ICON_LEFT, ICON_TOP, ICON_PX, p.text)
-        val label = "${s.speedText} ${if (s.kmh) "KM/H" else "M/S"}"
+        val label = "${s.speedText} ${s.unit.header}"
         header.color = p.text
         c.drawText(label, w - TEXT_RIGHT, baseline, header)
 

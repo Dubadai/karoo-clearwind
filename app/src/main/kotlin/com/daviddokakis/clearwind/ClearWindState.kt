@@ -10,11 +10,21 @@ data class ClearWindState(
     val windFromDeg: Double? = null,
     /** Direction of travel, degrees from north. Last known value, kept while standing still. */
     val headingDeg: Double? = null,
-    /** Show km/h instead of m/s. */
-    val kmh: Boolean = false,
+    /** Wind speed unit. */
+    val unit: WindUnit = WindUnit.MS,
     /** How the arrow is coloured. Tap the field to cycle. */
     val arrowColour: ArrowColour = ArrowColour.SPEED,
 ) {
+    /** Wind speed units, in the order the settings screen shows them. */
+    enum class WindUnit(val label: String, val header: String, val perMs: Double, val decimals: Boolean) {
+        KNOTS("knots", "KN", 1.94384, false),
+        MS("m/s", "M/S", 1.0, true),
+        KMH("km/h", "KM/H", 3.6, false),
+        MPH("mph", "MPH", 2.23694, false);
+
+        fun next(): WindUnit = entries[(ordinal + 1) % entries.size]
+    }
+
     enum class ArrowColour {
         /** Smooth green → red by wind speed. */
         SPEED,
@@ -38,12 +48,11 @@ data class ClearWindState(
             return normalize(from + 180.0 - h)
         }
 
-    /** Speed as shown: m/s with one decimal under 10, whole numbers above; km/h whole. "–" if unknown. */
+    /** Speed as shown: m/s with one decimal under 10, whole numbers above; other units whole. "–" if unknown. */
     val speedText: String
         get() {
-            val ms = windSpeedMs ?: return "–"
-            if (kmh) return (ms * 3.6).roundToInt().toString()
-            return if (ms < 9.95) String.format(java.util.Locale.US, "%.1f", ms) else ms.roundToInt().toString()
+            val v = (windSpeedMs ?: return "–") * unit.perMs
+            return if (unit.decimals && v < 9.95) String.format(java.util.Locale.US, "%.1f", v) else v.roundToInt().toString()
         }
 
     companion object {
