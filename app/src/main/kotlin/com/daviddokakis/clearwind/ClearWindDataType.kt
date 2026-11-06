@@ -1,8 +1,6 @@
 package com.daviddokakis.clearwind
 
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import android.content.res.Configuration
 import android.os.SystemClock
 import android.widget.RemoteViews
@@ -76,15 +74,8 @@ class ClearWindDataType(
         val v = RemoteViews(context.packageName, R.layout.field_main)
         v.setInt(R.id.root, "setBackgroundColor", WindRenderer.background(night))
         v.setImageViewBitmap(R.id.dial, WindRenderer.render(s, w, h, night))
-        // Tap anywhere to cycle the arrow colour. Taps don't always arrive; the remote action does.
-        val tap = PendingIntent.getBroadcast(
-            context, 1,
-            // Name the receiver class: it has no intent filter, so an action-only intent never arrives.
-            Intent(context, ActionReceiver::class.java).setAction(ActionReceiver.ACTION_TAP),
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
-        )
-        v.setOnClickPendingIntent(R.id.root, tap)
-        v.setOnClickPendingIntent(R.id.dial, tap)
+        // No tap handler on purpose: a clickable field swallows the touch, so the Karoo's own
+        // long-press (change data field) never starts. Colour is changed in Settings or by remote.
         return v
     }
 
