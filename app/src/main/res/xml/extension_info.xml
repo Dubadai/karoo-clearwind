@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ExtensionInfo
+    displayName="@string/extension_name"
+    icon="@drawable/ic_app"
+    id="clearwind"
+    scansDevices="false">
+
+    <DataType
+        description="@string/field_description"
+        displayName="@string/field_name"
+        graphical="true"
+        icon="@drawable/ic_app"
+        typeId="clearwind-field" />
+
+    <!-- Assign to a controller button (e.g. a remote) in the Karoo settings -->
+    <BonusAction
+        actionId="toggle-units"
+        displayName="@string/action_toggle_units" />
+
+    <BonusAction
+        actionId="arrow-colour"
+        displayName="@string/action_arrow_colour" />
+</ExtensionInfo>

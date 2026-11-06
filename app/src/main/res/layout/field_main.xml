@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The whole field is one bitmap (dial, arrow, speed) drawn by WindRenderer.
+     RemoteViews-safe widgets only. The root takes the background colour too, so if the Karoo makes
+     the field a bit smaller than it said, there's no gap. Tapping the field cycles the arrow colour. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/dial"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitCenter" />
+</FrameLayout>

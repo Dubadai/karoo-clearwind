@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ClearWind field mockup</title>
+<style>
+  :root { --page:#ECEAE4; --ink:#1B1B1A; --muted:#5F5E5A; }
+  body { margin:0; background:var(--page); color:var(--ink);
+         font:15px/1.45 -apple-system, "Helvetica Neue", Arial, sans-serif; padding:24px 16px 60px; }
+  h1 { font-size:24px; margin:0 0 4px; }
+  h2 { font-size:19px; margin:40px 0 4px; }
+  p.lead { margin:0 0 6px; color:var(--muted); max-width:780px; }
+  .row { display:flex; flex-wrap:wrap; gap:18px; margin-top:6px; align-items:flex-start; }
+  .cap { font-size:12px; color:var(--muted); margin-top:18px; }
+  .field { position:relative; overflow:hidden; border-radius:4px; box-shadow:0 0 0 1px #0002;
+           font-family:"Helvetica Neue", Arial, sans-serif; background:var(--bg); color:var(--tx); }
+  .light { --bg:#FFFFFF; --tx:#0B0B0B; --tx2:#5F5E5A; --head:#C8431E; --cross:#B07000; --tail:#3B6D11; --mono:#0B0B0B; }
+  .dark  { --bg:#0B0B0B; --tx:#FFFFFF; --tx2:#B4B2A9; --head:#FF7A52; --cross:#F2B33D; --tail:#97C459; --mono:#FFFFFF; }
+  .num { font-weight:800; letter-spacing:-1.5px; line-height:.85; }
+  .unit { color:var(--tx2); font-weight:700; }
+  .notes { max-width:780px; margin-top:12px; }
+  .notes li { margin:4px 0; }
+  .toggle { display:inline-flex; gap:0; margin:10px 0 0; border:1px solid #0003; border-radius:8px; overflow:hidden; }
+  .toggle button { font:inherit; border:0; padding:6px 14px; background:#fff; cursor:pointer; }
+  .toggle button.on { background:#1B1B1A; color:#fff; }
+</style>
+</head>
+<body>
+<h1>ClearWind: field mockup, round 2</h1>
+<p class="lead">The arrow is the hero: it takes as much of the field as it can. It is turned to your heading, so
+<b>up is straight ahead</b>, and it points the way the wind blows (a headwind arrow points down, at you).
+No headwind/tailwind words. The speed is the only text.</p>
+<p class="lead">Examples: headwind 5 m/s (from 20° right), crosswind 3.3 m/s (from the left), tailwind 6.1 m/s.</p>
+<div class="toggle" id="unitToggle"><button data-u="ms" class="on">m/s</button><button data-u="kmh">km/h</button></div>
+<span style="color:var(--muted);font-size:13px;margin-left:8px">← tap to preview the unit switch</span>
+
+<h2>Option A: arrow + number beside it</h2>
+<p class="lead">Arrow fills the full height. The speed sits to the side, big but clearly second.</p>
+<div id="A"></div>
+
+<h2>Option B: arrow fills the field, number in the corner</h2>
+<p class="lead">Arrow as big as the field allows, centred. Speed small in the top-right corner, out of the arrow's way.</p>
+<div id="B"></div>
+
+<h2>Arrow colour</h2>
+<p class="lead">Both options above colour the arrow by how the wind hits you (red-ish head, amber cross, green tail),
+an extra cue with no words. Alternative: plain black/white arrow, maximum contrast.</p>
+<div id="C"></div>
+
+<h2>Switching m/s ↔ km/h</h2>
+<ul class="notes">
+  <li><b>Tap the field</b> to switch. The choice is remembered.</li>
+  <li>Taps on fields don't always reach the app on the Karoo, so also a <b>remote button action</b> "Switch wind units".</li>
+  <li>m/s shows one decimal under 10 (3.3), whole numbers above (12). km/h always whole numbers.</li>
+  <li><b>No data yet</b> (no phone/Wi-Fi connection): grey outline arrow, speed "–".</li>
+</ul>
+
+<script>
+const S = [
+  { key:'head',  ms:5.0, rel:20  },   // wind FROM 20° right of ahead
+  { key:'cross', ms:3.3, rel:-90 },   // from the left
+  { key:'tail',  ms:6.1, rel:175 },
+];
+const sizes = [
+  { w:239, h:180, label:'Small (¼ page)' },
+  { w:239, h:120, label:'Smallest (⅛ page)' },
+  { w:478, h:120, label:'Wide row' },
+];
+let unit = 'ms';
+function fmt(ms){
+  if (unit==='kmh') return { n: String(Math.round(ms*3.6)), u:'km/h' };
+  return { n: ms < 10 ? ms.toFixed(1) : String(Math.round(ms)), u:'m/s' };
+}
+// Bold, wide-headed arrow. Points where the wind blows TO, relative to heading (up = ahead).
+function arrow(rel, size, color) {
+  return `<svg width="${size}" height="${size}" viewBox="-50 -50 100 100" style="flex:none;display:block">
+    <g transform="rotate(${rel+180})"><path d="M0,-48 L38,4 L13,4 L13,48 L-13,48 L-13,4 L-38,4 Z"
+      fill="${color}" stroke="${color}" stroke-width="3" stroke-linejoin="round"/></g></svg>`;
+}
+function fieldA(s, sz, theme, mono){
+  const c = mono ? 'var(--mono)' : `var(--${s.key})`, f = fmt(s.ms);
+  const big = sz.w > 300 ? 84 : (sz.h > 150 ? 58 : 50);
+  const a = Math.min(sz.h - 12, sz.w - 20 - big * 1.55); // arrow as big as possible, number still fits
+  return `<div class="field ${theme}" style="width:${sz.w}px;height:${sz.h}px;display:flex;align-items:center;padding:0 10px;box-sizing:border-box;gap:6px">
+      ${arrow(s.rel, a, c)}
+      <div style="margin-left:auto;text-align:right;flex:none">
+        <div class="num" style="font-size:${big}px">${f.n}</div>
+        <div class="unit" style="font-size:${Math.round(big*0.3)}px;margin-top:6px">${f.u}</div>
+      </div>
+    </div>`;
+}
+function fieldB(s, sz, theme, mono){
+  const c = mono ? 'var(--mono)' : `var(--${s.key})`, f = fmt(s.ms);
+  const a = Math.min(sz.w, sz.h) - 8;
+  const big = sz.h > 150 ? 40 : 32;
+  return `<div class="field ${theme}" style="width:${sz.w}px;height:${sz.h}px">
+      <div style="position:absolute;left:${sz.w>300 ? (sz.w-a)/2 : (sz.w-a)/2 - 30}px;top:4px">${arrow(s.rel, a, c)}</div>
+      <div style="position:absolute;right:10px;top:20px;text-align:right">
+        <div class="num" style="font-size:${big}px">${f.n}</div>
+        <div class="unit" style="font-size:${Math.round(big*0.42)}px;margin-top:4px">${f.u}</div>
+      </div>
+    </div>`;
+}
+function render(){
+  for (const [id, fn] of [['A',fieldA],['B',fieldB]]) {
+    let html = '';
+    for (const sz of sizes) for (const theme of ['light','dark']) {
+      html += `<div class="cap">${sz.label}, ${sz.w}×${sz.h} px, ${theme}</div><div class="row">`;
+      for (const s of S) html += fn(s, sz, theme, false);
+      html += '</div>';
+    }
+    document.getElementById(id).innerHTML = html;
+  }
+  let c = '';
+  for (const theme of ['light','dark']) {
+    c += `<div class="cap">Option A, plain arrow, ${theme}</div><div class="row">`;
+    for (const s of S) c += fieldA(s, sizes[0], theme, true);
+    c += '</div>';
+  }
+  document.getElementById('C').innerHTML = c;
+}
+document.querySelectorAll('#unitToggle button').forEach(b => b.onclick = () => {
+  unit = b.dataset.u;
+  document.querySelectorAll('#unitToggle button').forEach(x => x.classList.toggle('on', x===b));
+  render();
+});
+render();
+</script>
+</body>
+</html>

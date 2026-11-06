@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ClearWind arrow A2</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin:0; }
+  body { background:#2A2A2A; padding:48px 16px 64px; box-sizing:border-box; }
+  .stage { display:grid; justify-items:center; gap:56px; }
+  .devices { display:flex; flex-wrap:wrap; justify-content:center; gap:40px; }
+  .devices canvas { cursor:pointer; }
+  .tiles { display:grid; gap:20px; justify-items:center; }
+  .tiles .row { display:flex; flex-wrap:nowrap; justify-content:center; gap:14px; }
+  .tiles canvas { border-radius:4px; width:min(238px, calc((100vw - 74px) / 4)); height:auto; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="devices" id="devices"></div>
+  <div class="tiles" id="tiles"></div>
+</div>
+
+<script>/*__KAROO_DEVICE_JS__*/</script>
+<script>
+const FRAME = "__FRAME__", SCREEN = "__SCREEN__";
+
+/* ---------- The ClearWind field, drawn like WindRenderer.kt ---------- */
+
+// Arrow A2: native shape, wings 25% shorter. 24-unit box, centre (12,12), pointing up.
+const ARROW = new Path2D('M12,4 L18,10 L16.58,11.42 L13,7.83 L13,20 L11,20 L11,7.83 L7.42,11.42 L6,10 Z');
+const ARROW_RADIUS = 34;                                  // design units (box 100), any angle
+const ICON_PX = 23, ICON_LEFT = 12, ICON_TOP = 12, TEXT_RIGHT = 10, GAP = 6;
+const HEADER_FONT = '500 29px "IBM Plex Sans Condensed"';   // Karoo header: capitals 20 px tall (measured)
+const KAROO_GREEN = '#129A5E';
+const COLOURS = ['speed', 'mono', 'green'];
+
+const STOPS = [[0,'#2F8A3E'],[4,'#C99A00'],[8,'#E06A10'],[12,'#C62828']];
+function speedColor(ms){
+  const hex = c => [1,3,5].map(i=>parseInt(c.substr(i,2),16)), v = Math.min(ms, 12);
+  for (let i=1;i<STOPS.length;i++) if (v <= STOPS[i][0]) {
+    const [a0,c0]=STOPS[i-1],[a1,c1]=STOPS[i], f=(v-a0)/(a1-a0), A=hex(c0), B=hex(c1);
+    return `rgb(${A.map((x,j)=>Math.round(x+(B[j]-x)*f)).join(',')})`;
+  }
+  return STOPS.at(-1)[1];
+}
+const speedText = ms => (ms < 9.95 ? ms.toFixed(1) : String(Math.round(ms))) + ' M/S';
+
+function windIcon(ctx, color) {
+  const s = ICON_PX / 18;
+  ctx.save();
+  ctx.translate(ICON_LEFT - 2 * s, ICON_TOP - 3.5 * s);
+  ctx.scale(s, s);
+  ctx.strokeStyle = color; ctx.lineWidth = 2.2; ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(3, 9); ctx.lineTo(13, 9); ctx.arc(13, 6.5, 2.5, Math.PI / 2, -Math.PI, true);
+  ctx.moveTo(3, 12.5); ctx.lineTo(16.5, 12.5); ctx.arc(16.5, 10, 2.5, Math.PI / 2, -Math.PI, true);
+  ctx.moveTo(3, 16); ctx.lineTo(14, 16); ctx.arc(14, 18.5, 2.5, -Math.PI / 2, Math.PI, false);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function distance(x, y, r) {
+  const dx = Math.max(r.l - x, 0, x - r.r), dy = Math.max(r.t - y, 0, y - r.b);
+  return Math.hypot(dx, dy);
+}
+
+/** One field: w×h px at (0,0). opt: { dark, ms, deg, colour } */
+function drawField(ctx, w, h, { dark, ms, deg, colour }) {
+  const ink = dark ? '#FFFFFF' : '#000000';
+  ctx.fillStyle = dark ? '#000000' : '#FFFFFF';
+  ctx.fillRect(0, 0, w, h);
+
+  // Header: icon left, speed right, centred on one line.
+  windIcon(ctx, ink);
+  ctx.font = HEADER_FONT; ctx.fillStyle = ink; ctx.textAlign = 'right'; ctx.textBaseline = 'alphabetic';
+  const caps = ctx.measureText('M').actualBoundingBoxAscent;
+  const baseline = ICON_TOP + ICON_PX / 2 + caps / 2;
+  const label = speedText(ms);
+  ctx.fillText(label, w - TEXT_RIGHT, baseline);
+
+  // Arrow: as big as possible without coming within GAP px of the header.
+  const m = ctx.measureText(label.replace(/[0-9]/g, '8'));
+  const text = { l: w - TEXT_RIGHT - m.width - GAP, r: w - TEXT_RIGHT + GAP,
+                 t: baseline - m.actualBoundingBoxAscent - GAP, b: baseline + m.actualBoundingBoxDescent + GAP };
+  const icon = { l: ICON_LEFT - GAP, r: ICON_LEFT + ICON_PX + GAP, t: ICON_TOP - GAP, b: ICON_TOP + ICON_PX + GAP };
+  const edge = 4, top = Math.max(text.b, icon.b);
+  const rUnder = Math.min((h - edge - top) / 2, w / 2 - edge);
+  const rCentre = Math.min(Math.min(w, h) / 2 - edge, distance(w / 2, h / 2, text), distance(w / 2, h / 2, icon));
+  const under = rUnder >= rCentre;
+  const size = Math.max(rUnder, rCentre) * 100 / ARROW_RADIUS;
+  ctx.save();
+  ctx.translate(w / 2, under ? (top + h - edge) / 2 : h / 2);
+  ctx.rotate(deg * Math.PI / 180);
+  ctx.scale(size / 24, size / 24);
+  ctx.translate(-12, -12);
+  ctx.fillStyle = colour === 'speed' ? speedColor(ms) : colour === 'mono' ? ink : KAROO_GREEN;
+  ctx.fill(ARROW);
+  ctx.restore();
+}
+
+/* ---------- The ride page without the Karoo's floating back / play buttons ---------- */
+
+// Bottom row of the screenshot: ClearWind (left) and Calories (right), both 142 px tall at y 635.
+// The Karoo's buttons float over both, so both fields are redrawn here.
+function cleanBottomRow(ctx, screenImg, { dark, ms, deg, colour }) {
+  // Left: ClearWind.
+  ctx.save(); ctx.translate(0, 635); drawField(ctx, 238, 142, { dark, ms, deg, colour }); ctx.restore();
+  ctx.fillStyle = dark ? '#000000' : '#FFFFFF';
+  ctx.fillRect(0, 777, 240, 23);
+  // Right: Calories (power), like the other two-line fields: flame from the screenshot,
+  // header in the Karoo's font, value "0" copied from LAP AVG POWER (same layout, 432 px higher).
+  ctx.fillStyle = dark ? '#000000' : '#FFFFFF';
+  ctx.fillRect(240, 635, 240, 165);
+  ctx.drawImage(screenImg, 250, 650, 30, 34, 250, 650, 30, 34);
+  ctx.font = HEADER_FONT; ctx.textAlign = 'right'; ctx.fillStyle = dark ? '#FFFFFF' : '#000000';
+  const caps = ctx.measureText('M').actualBoundingBoxAscent;
+  ctx.fillText('CALORIES', 470, 646 + caps);
+  ctx.fillText('(POWER)', 470, 669 + caps);
+  ctx.drawImage(screenImg, 428, 265, 46, 72, 428, 265 + 432, 46, 72);
+}
+
+/* ---------- Page ---------- */
+
+async function darkVersion(src) {      // simulated dark mode: greys flip, colours stay
+  const im = await loadImg(src);
+  const c = document.createElement('canvas'); c.width = im.width; c.height = im.height;
+  const ctx = c.getContext('2d'); ctx.drawImage(im, 0, 0);
+  const d = ctx.getImageData(0, 0, c.width, c.height), p = d.data;
+  for (let i = 0; i < p.length; i += 4) {
+    const mx = Math.max(p[i], p[i+1], p[i+2]), mn = Math.min(p[i], p[i+1], p[i+2]);
+    if (mx === 0 || (mx - mn) / mx < 0.12) { p[i] = 255 - p[i]; p[i+1] = 255 - p[i+1]; p[i+2] = 255 - p[i+2]; }
+  }
+  ctx.putImageData(d, 0, 0);
+  return c.toDataURL();
+}
+const loadImg = src => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.src = src; });
+
+function tile(opt, scale = 1) {
+  const w = 238, h = 142, dpr = window.devicePixelRatio || 1;
+  const c = document.createElement('canvas');
+  c.width = w * scale * dpr; c.height = h * scale * dpr;
+  const ctx = c.getContext('2d'); ctx.scale(scale * dpr, scale * dpr);
+  drawField(ctx, w, h, opt);
+  return c;
+}
+
+(async () => {
+  await document.fonts.load(HEADER_FONT);
+  const darkSrc = await darkVersion(SCREEN);
+  const modes = [
+    { dark: false, dev: await KarooDevice.load({ frame: FRAME, screen: SCREEN }), img: await loadImg(SCREEN) },
+    { dark: true, dev: await KarooDevice.load({ frame: FRAME, screen: darkSrc }), img: await loadImg(darkSrc) },
+  ];
+
+  // Devices: tap the wind field to cycle the arrow colour.
+  let colour = 0;
+  const holder = document.getElementById('devices');
+  function renderDevices() {
+    holder.replaceChildren(...modes.map(m => {
+      const scr = m.dev.screen({ scale: 2, draw: ctx => cleanBottomRow(ctx, m.img, { dark: m.dark, ms: 5.2, deg: 45, colour: COLOURS[colour] }) });
+      const canvas = m.dev.device(scr, 340);
+      canvas.addEventListener('click', e => {
+        const k = 340 / 1100, r = canvas.getBoundingClientRect();
+        const sx = ((e.clientX - r.left) / k - 177) * 480 / 745, sy = ((e.clientY - r.top) / k - 215) * 800 / 1232;
+        if (sx >= 0 && sx <= 238 && sy >= 635 && sy <= 777) { colour = (colour + 1) % COLOURS.length; renderDevices(); }
+      });
+      return canvas;
+    }));
+  }
+  renderDevices();
+
+  // Field on its own: one row per arrow colour, light then dark, a few winds.
+  const winds = [{ ms: 2.1, deg: 10 }, { ms: 5.2, deg: -90 }, { ms: 7.8, deg: 140 }, { ms: 11.6, deg: -170 }];
+  const tiles = document.getElementById('tiles');
+  for (const c of COLOURS) for (const dark of [false, true]) {
+    const row = document.createElement('div'); row.className = 'row';
+    for (const w of winds) row.append(tile({ dark, colour: c, ...w }));
+    tiles.append(row);
+  }
+})();
+</script>
+</body>
+</html>
