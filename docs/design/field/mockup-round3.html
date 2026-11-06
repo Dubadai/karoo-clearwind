@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ClearWind field mockup</title>
+<style>
+  :root { --page:#ECEAE4; --ink:#1B1B1A; --muted:#5F5E5A; }
+  body { margin:0; background:var(--page); color:var(--ink);
+         font:15px/1.45 -apple-system, "Helvetica Neue", Arial, sans-serif; padding:24px 16px 60px; }
+  h1 { font-size:24px; margin:0 0 4px; }
+  h2 { font-size:19px; margin:40px 0 4px; }
+  p.lead { margin:0 0 6px; color:var(--muted); max-width:780px; }
+  .row { display:flex; flex-wrap:wrap; gap:18px; margin-top:6px; align-items:flex-start; }
+  .cap { font-size:12px; color:var(--muted); margin-top:18px; }
+  .field { position:relative; overflow:hidden; border-radius:4px; box-shadow:0 0 0 1px #0002;
+           font-family:"Helvetica Neue", Arial, sans-serif; display:flex; align-items:center;
+           padding:0 12px; box-sizing:border-box; gap:6px; }
+  /* Effect colours. Tile backgrounds are dark enough for white text in sunlight. */
+  .light { --bg:#FFFFFF; --tx:#0B0B0B; --tx2:#5F5E5A; --ring:#0B0B0B;
+           --head:#C2361B; --cross:#B36A00; --tail:#2F8A3E; }
+  .dark  { --bg:#0B0B0B; --tx:#FFFFFF; --tx2:#B4B2A9; --ring:#FFFFFF;
+           --head:#FF7A52; --cross:#F2B33D; --tail:#6CCB6A; }
+  .tile.head  { --tbg:#C2361B; } .tile.cross { --tbg:#B36A00; } .tile.tail { --tbg:#2F8A3E; }
+  .dark.tile.head  { --tbg:#9E2A14; } .dark.tile.cross { --tbg:#8F5500; } .dark.tile.tail { --tbg:#256E31; }
+  .num { font-weight:800; letter-spacing:-1.5px; line-height:.85; }
+  .unit { font-weight:700; opacity:.75; }
+  .notes { max-width:780px; margin-top:12px; } .notes li { margin:4px 0; }
+  .toggle { display:inline-flex; margin:10px 0 0; border:1px solid #0003; border-radius:8px; overflow:hidden; }
+  .toggle button { font:inherit; border:0; padding:6px 14px; background:#fff; cursor:pointer; }
+  .toggle button.on { background:#1B1B1A; color:#fff; }
+  .insp { display:flex; gap:12px; margin-top:8px; } .insp img { height:90px; border-radius:6px; }
+</style>
+</head>
+<body>
+<h1>ClearWind: field mockup, round 3</h1>
+<p class="lead">New arrow from your references: a <b>thick rounded line with an open chevron head</b>, no fill.
+Arrow first, speed beside it (layout A). Up = straight ahead; the arrow points the way the wind blows.</p>
+<div class="insp">
+  <img src="inspiration/arrow-tile.png" alt=""><img src="inspiration/arrow-arc-dark.png" alt=""><img src="inspiration/arrow-ring.png" alt="">
+</div>
+<p class="lead" style="margin-top:10px">Examples: headwind 5 m/s (from 20° right), crosswind 3.3 m/s (from the left), tailwind 6.1 m/s.</p>
+<div class="toggle" id="unitToggle"><button data-u="ms" class="on">m/s</button><button data-u="kmh">km/h</button></div>
+
+<h2>Style 1: colour tile</h2>
+<p class="lead">Like your first reference. The whole field turns red / amber / green by how the wind hits you, with a white arrow.
+Readable from the corner of your eye; the colour alone tells you head, cross or tail.</p>
+<div id="S1"></div>
+
+<h2>Style 2: colour tile + ring</h2>
+<p class="lead">Like your third reference. A soft ring with a dot at the top that marks <b>straight ahead</b>, so it's obvious the arrow is relative to you.
+Costs a little arrow size.</p>
+<div id="S2"></div>
+
+<h2>Style 3: plain background, coloured arrow + ring</h2>
+<p class="lead">Like your second reference. Normal white/black field, the arrow carries the colour. Calmer on a busy ride page.</p>
+<div id="S3"></div>
+
+<h2>Unchanged from round 2</h2>
+<ul class="notes">
+  <li>Tap the field or use the remote action "Switch wind units" to switch m/s ↔ km/h; remembered.</li>
+  <li><b>No data yet:</b> grey tile / grey arrow, speed "–".</li>
+</ul>
+
+<script>
+const S = [
+  { key:'head',  ms:5.0, rel:20  },
+  { key:'cross', ms:3.3, rel:-90 },
+  { key:'tail',  ms:6.1, rel:175 },
+];
+const sizes = [
+  { w:239, h:180, label:'Small (¼ page)' },
+  { w:239, h:120, label:'Smallest (⅛ page)' },
+  { w:478, h:120, label:'Wide row' },
+];
+let unit = 'ms';
+function fmt(ms){
+  if (unit==='kmh') return { n:String(Math.round(ms*3.6)), u:'km/h' };
+  return { n: ms < 10 ? ms.toFixed(1) : String(Math.round(ms)), u:'m/s' };
+}
+// Rounded line arrow, points where the wind blows TO relative to heading (up = ahead).
+function arrow(rel, size, color, ring, ringColor) {
+  const r = rel + 180, len = ring ? 30 : 40, sw = ring ? 11 : 14, head = ring ? 17 : 22;
+  const ringSvg = ring ? `<circle r="42" fill="none" stroke="${ringColor}" stroke-opacity=".35" stroke-width="3.5"/>
+      <circle cx="0" cy="-42" r="6.5" fill="${ringColor}"/>` : '';
+  return `<svg width="${size}" height="${size}" viewBox="-50 -50 100 100" style="flex:none;display:block">
+    ${ringSvg}
+    <g transform="rotate(${r})" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M0,${len} L0,${-len+2}"/>
+      <path d="M${-head},${-len+head} L0,${-len} L${head},${-len+head}"/>
+    </g></svg>`;
+}
+function field(style, s, sz, theme){
+  const f = fmt(s.ms), tile = style !== 3;
+  const big = sz.w > 300 ? 84 : (sz.h > 150 ? 58 : 50);
+  const a = Math.min(sz.h - 8, sz.w - 24 - big * 1.55);
+  const arrowColor = tile ? '#FFFFFF' : `var(--${s.key})`;
+  const ringColor  = tile ? '#FFFFFF' : 'var(--ring)';
+  const bg = tile ? 'var(--tbg)' : 'var(--bg)';
+  const tx = tile ? '#FFFFFF' : 'var(--tx)';
+  return `<div class="field ${theme} ${tile ? 'tile '+s.key : ''}" style="width:${sz.w}px;height:${sz.h}px;background:${bg};color:${tx}">
+      ${arrow(s.rel, a, arrowColor, style !== 1, ringColor)}
+      <div style="margin-left:auto;text-align:right;flex:none">
+        <div class="num" style="font-size:${big}px">${f.n}</div>
+        <div class="unit" style="font-size:${Math.round(big*0.3)}px;margin-top:6px">${f.u}</div>
+      </div>
+    </div>`;
+}
+function render(){
+  for (const style of [1,2,3]) {
+    let html = '';
+    for (const sz of sizes) for (const theme of ['light','dark']) {
+      html += `<div class="cap">${sz.label}, ${sz.w}×${sz.h} px, ${theme}</div><div class="row">`;
+      for (const s of S) html += field(style, s, sz, theme);
+      html += '</div>';
+    }
+    document.getElementById('S'+style).innerHTML = html;
+  }
+}
+document.querySelectorAll('#unitToggle button').forEach(b => b.onclick = () => {
+  unit = b.dataset.u;
+  document.querySelectorAll('#unitToggle button').forEach(x => x.classList.toggle('on', x===b));
+  render();
+});
+render();
+</script>
+</body>
+</html>

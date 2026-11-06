@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ClearWind arrow head</title>
+<style>
+  :root { --page:#ECEAE4; --ink:#1B1B1A; --muted:#5F5E5A; }
+  body { margin:0; background:var(--page); color:var(--ink);
+         font:15px/1.45 -apple-system, "Helvetica Neue", Arial, sans-serif; padding:24px 16px 60px; }
+  h1 { font-size:24px; margin:0 0 4px; }
+  h2 { font-size:19px; margin:44px 0 2px; }
+  p.lead { margin:0 0 6px; color:var(--muted); max-width:820px; }
+  .row { display:flex; flex-wrap:wrap; gap:16px; margin-top:12px; align-items:flex-end; }
+  .cell { display:grid; gap:8px; justify-items:center; }
+  .cell canvas.zoom { border-radius:4px; box-shadow:0 0 0 1px #0002; width:238px; height:142px; }
+  .cap { font-size:12px; color:var(--muted); }
+  .shape { width:60px; height:60px; }
+</style>
+</head>
+<body>
+<h1>ClearWind: arrow head options, round 2</h1>
+<p class="lead">Each option is drawn on a real screenshot of your ride page, in the Karoo 3. Only the arrow is redrawn;
+everything else (other fields, the Karoo's buttons) is the real screen. Three angles each, including the
+diagonal where the current wings get mixed up with the shaft. Under each device: the field at actual size.</p>
+<div id="out"></div>
+
+<script>/*__KAROO_DEVICE_JS__*/</script>
+<script>
+const FRAME = "__FRAME__", SCREEN = "__SCREEN__";
+
+// Arrow shapes in a 24-unit box, centre (12,12), pointing up. Same scale as the built field.
+const OPTIONS = [
+  { name: 'Now: long wings', note: 'The built version. On diagonals the wings are almost as long as the shaft.',
+    path: 'M4,12 L5.41,13.41 L11,7.83 L11,20 L13,20 L13,7.83 L18.58,13.42 L20,12 L12,4 Z' },
+  { name: 'A2: wings 25% shorter', note: 'Your pick: like the built arrow, wings 25% shorter (same thickness).',
+    path: 'M12,4 L18,10 L16.58,11.42 L13,7.83 L13,20 L11,20 L11,7.83 L7.42,11.42 L6,10 Z' },
+  { name: 'A: short wings', note: 'Same open head, wings about half as long, so the shaft clearly dominates.',
+    path: 'M12,4 L16.7,8.7 L15.3,10.1 L13,7.8 L13,20 L11,20 L11,7.8 L8.7,10.1 L7.3,8.7 Z' },
+  { name: 'B: short wings, bolder', note: 'As A with a thicker shaft and wings: reads from further away.',
+    path: 'M12,3.8 L17,8.8 L15.2,10.6 L13.3,8.7 L13.3,20.5 L10.7,20.5 L10.7,8.7 L8.8,10.6 L7,8.8 Z' },
+  { name: 'C: solid head', note: 'Filled triangle head on a thin shaft: the head can never be mistaken for the shaft.',
+    path: 'M12,3.5 L18,10.5 L13,10.5 L13,20 L11,20 L11,10.5 L6,10.5 Z' },
+  { name: 'D: solid head, narrow', note: 'Smaller filled head and a thicker shaft: compact, very clear direction.',
+    path: 'M12,3.5 L16.5,10.5 L13.25,10.5 L13.25,20.5 L10.75,20.5 L10.75,10.5 L7.5,10.5 Z' },
+];
+const ANGLES = [{ deg: 45, label: 'diagonal' }, { deg: 135, label: 'behind right' }, { deg: -100, label: 'from the right' }];
+
+// Field geometry on this screenshot (bottom-left field, 238×142, top at y 635).
+const FIELD = [0, 635, 238, 142];
+const ARROW_CX = 119, ARROW_CY = 635 + 91, UNIT_PX = 5.76;   // as the built renderer places it
+const BACK_BUTTON = ctx => ctx.roundRect(-50, 683, 150, 100, 50);
+
+const STOPS = [[0,'#2F8A3E'],[4,'#C99A00'],[8,'#E06A10'],[12,'#C62828']];
+function speedColor(ms){
+  const hex = c => [1,3,5].map(i=>parseInt(c.substr(i,2),16)), v = Math.min(ms, 12);
+  for (let i=1;i<STOPS.length;i++) if (v <= STOPS[i][0]) {
+    const [a0,c0]=STOPS[i-1],[a1,c1]=STOPS[i], f=(v-a0)/(a1-a0), A=hex(c0), B=hex(c1);
+    return `rgb(${A.map((x,j)=>Math.round(x+(B[j]-x)*f)).join(',')})`;
+  }
+  return STOPS.at(-1)[1];
+}
+
+(async () => {
+  const dev = await KarooDevice.load({ frame: FRAME, screen: SCREEN });
+  const out = document.getElementById('out');
+  for (const o of OPTIONS) {
+    const h = document.createElement('h2'); h.textContent = o.name; out.append(h);
+    const p = document.createElement('p'); p.className = 'lead'; p.textContent = o.note; out.append(p);
+    const row = document.createElement('div'); row.className = 'row'; out.append(row);
+    for (const a of ANGLES) {
+      const scr = dev.screen({
+        scale: 2,
+        draw(ctx) {
+          ctx.fillStyle = '#fff';                       // clear the old arrow (below the header)
+          ctx.fillRect(0, 676, 238, 777 - 676);
+          ctx.translate(ARROW_CX, ARROW_CY);
+          ctx.rotate(a.deg * Math.PI / 180);
+          ctx.scale(UNIT_PX, UNIT_PX);
+          ctx.translate(-12, -12);
+          ctx.fillStyle = speedColor(5.2);
+          ctx.fill(new Path2D(o.path));
+        },
+        keepOnTop: [BACK_BUTTON],
+      });
+      const cell = document.createElement('div'); cell.className = 'cell';
+      cell.append(dev.device(scr, 240));
+      const z = dev.crop(scr, FIELD, 2); z.className = 'zoom'; cell.append(z);
+      const cap = document.createElement('div'); cap.className = 'cap'; cap.textContent = `Arrow ${a.label} (${a.deg}°)`; cell.append(cap);
+      row.append(cell);
+    }
+  }
+})();
+</script>
+</body>
+</html>

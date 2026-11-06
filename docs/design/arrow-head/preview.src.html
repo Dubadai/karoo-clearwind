@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ClearWind arrow A2</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body { height:100%; margin:0; }
+  body { background:#2A2A2A; color:#E8E6E1; font:14px/1.45 -apple-system, "Helvetica Neue", Arial, sans-serif;
+         display:grid; place-items:center; padding:24px 16px; box-sizing:border-box; }
+  .stage { display:grid; justify-items:center; gap:22px; }
+  .devices { display:flex; flex-wrap:wrap; justify-content:center; gap:40px; }
+  .dev { display:grid; justify-items:center; gap:10px; }
+  .dev canvas { cursor:pointer; }
+  .cap { color:#A9A6A0; font-size:13px; }
+  .hint { color:#8C8983; font-size:13px; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="devices" id="devices"></div>
+  <div class="hint">Tap the wind field to cycle the arrow colour: by wind speed → black / white → Karoo green.</div>
+</div>
+
+<script>/*__KAROO_DEVICE_JS__*/</script>
+<script>
+const FRAME = "__FRAME__", SCREEN = "__SCREEN__";
+
+// A2: the built arrow with the wings 25% shorter. 24-unit box, centre (12,12), pointing up.
+const ARROW = new Path2D('M12,4 L18,10 L16.58,11.42 L13,7.83 L13,20 L11,20 L11,7.83 L7.42,11.42 L6,10 Z');
+const ANGLE = 45, SPEED = 5.2;
+const KAROO_GREEN = '#129A5E';                      // sampled from the Karoo's own field icons
+const COLOUR_MODES = ['speed', 'mono', 'green'];
+const MODE_NAMES = { speed: 'coloured by wind speed', mono: 'black / white', green: 'Karoo green' };
+const FIELD = [0, 635, 238, 142];
+const ARROW_CX = 119, ARROW_CY = 635 + 91, UNIT_PX = 5.76;
+const BACK_BUTTON = ctx => ctx.roundRect(-50, 683, 150, 100, 50);
+const WIDTH = 340;
+
+const STOPS = [[0,'#2F8A3E'],[4,'#C99A00'],[8,'#E06A10'],[12,'#C62828']];
+function speedColor(ms){
+  const hex = c => [1,3,5].map(i=>parseInt(c.substr(i,2),16)), v = Math.min(ms, 12);
+  for (let i=1;i<STOPS.length;i++) if (v <= STOPS[i][0]) {
+    const [a0,c0]=STOPS[i-1],[a1,c1]=STOPS[i], f=(v-a0)/(a1-a0), A=hex(c0), B=hex(c1);
+    return `rgb(${A.map((x,j)=>Math.round(x+(B[j]-x)*f)).join(',')})`;
+  }
+  return STOPS.at(-1)[1];
+}
+
+// Dark mode, simulated from the light screenshot: greys flip (white ↔ black), colours stay.
+async function darkVersion(src) {
+  const im = await new Promise(r => { const i = new Image(); i.onload = () => r(i); i.src = src; });
+  const c = document.createElement('canvas'); c.width = im.width; c.height = im.height;
+  const ctx = c.getContext('2d'); ctx.drawImage(im, 0, 0);
+  const d = ctx.getImageData(0, 0, c.width, c.height), p = d.data;
+  for (let i = 0; i < p.length; i += 4) {
+    const mx = Math.max(p[i], p[i+1], p[i+2]), mn = Math.min(p[i], p[i+1], p[i+2]);
+    if (mx === 0 || (mx - mn) / mx < 0.12) { p[i] = 255 - p[i]; p[i+1] = 255 - p[i+1]; p[i+2] = 255 - p[i+2]; }
+  }
+  ctx.putImageData(d, 0, 0);
+  return c.toDataURL();
+}
+
+(async () => {
+  const modes = [
+    { name: 'Light mode', dev: await KarooDevice.load({ frame: FRAME, screen: SCREEN }), bg: '#FFFFFF', mono: '#0B0B0B' },
+    { name: 'Dark mode (simulated)', dev: await KarooDevice.load({ frame: FRAME, screen: await darkVersion(SCREEN) }), bg: '#000000', mono: '#FFFFFF' },
+  ];
+  let mode = 0;
+  const holder = document.getElementById('devices');
+  const cells = modes.map(m => {
+    const cell = document.createElement('div'); cell.className = 'dev';
+    const cap = document.createElement('div'); cap.className = 'cap';
+    cell.append(document.createElement('canvas'), cap);
+    holder.append(cell);
+    return { m, cell, cap };
+  });
+
+  function render() {
+    for (const { m, cell, cap } of cells) {
+      const scr = m.dev.screen({
+        scale: 2,
+        draw(ctx) {
+          ctx.fillStyle = m.bg;                         // clear the old arrow (below the header)
+          ctx.fillRect(0, 676, 238, 777 - 676);
+          ctx.translate(ARROW_CX, ARROW_CY);
+          ctx.rotate(ANGLE * Math.PI / 180);
+          ctx.scale(UNIT_PX, UNIT_PX);
+          ctx.translate(-12, -12);
+          const cm = COLOUR_MODES[mode];
+          ctx.fillStyle = cm === 'speed' ? speedColor(SPEED) : cm === 'mono' ? m.mono : KAROO_GREEN;
+          ctx.fill(ARROW);
+        },
+        keepOnTop: [BACK_BUTTON],
+      });
+      const canvas = m.dev.device(scr, WIDTH);
+      canvas.addEventListener('click', e => {
+        // Device px → screen px; toggle when the tap lands on the wind field.
+        const k = WIDTH / 1100, r = canvas.getBoundingClientRect();
+        const sx = ((e.clientX - r.left) / k - 177) * 480 / 745;
+        const sy = ((e.clientY - r.top) / k - 215) * 800 / 1232;
+        const [fx, fy, fw, fh] = FIELD;
+        if (sx >= fx && sx <= fx + fw && sy >= fy && sy <= fy + fh) { mode = (mode + 1) % COLOUR_MODES.length; render(); }
+      });
+      cell.replaceChild(canvas, cell.firstChild);
+      cap.textContent = `${m.name} · arrow ${MODE_NAMES[COLOUR_MODES[mode]]}`;
+    }
+  }
+  render();
+})();
+</script>
+</body>
+</html>
