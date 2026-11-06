@@ -7,3 +7,4 @@ decided, and `device/` screenshots from the Karoo (`NN-what-light|dark.png`).
 | --- | --- |
 | `field/` | The ClearWind data field: layout options A/B |
 | `arrow-head/` | Arrow head options (wings too long), shown on the device |
+| `screens/` | Clean screens and field images for visuals and the Karoo Artboard |
