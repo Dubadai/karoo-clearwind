@@ -10,7 +10,7 @@ It works at any field size.
 **Read it:**
 - The **arrow** shows which way the wind is blowing, turned to the way you ride. Up is straight
   ahead: an arrow pointing up is a tailwind, pointing down at you is a headwind.
-- The arrow's **colour**: tap the field to cycle between three styles, and it's remembered:
+- The arrow's **colour**: pick one of three styles in Settings, and it's remembered:
   1. by wind speed: green is light, through yellow and orange, to red at 12 m/s and above;
   2. plain black (white in dark mode);
   3. Karoo green.
@@ -22,8 +22,9 @@ It works at any field size.
 km/h or mph; m/s to start with) and the arrow colour.
 
 **During a ride:** put "Switch wind units" on a remote button (Settings → Controllers) to step
-through the units. There's also "Switch arrow colour" for a remote button, since taps on a field
-don't always arrive. Every choice is remembered.
+through the units. There's also "Switch arrow colour" for a remote button. Every choice is remembered.
+
+**Change the field:** long-press it, as with any Karoo field. Tapping the field does nothing.
 
 **Where the wind comes from:** Open-Meteo weather for where you are, fetched through the Karoo's
 Wi-Fi or the Hammerhead phone app, every 10 minutes (sooner after 5 km). No account or key needed.

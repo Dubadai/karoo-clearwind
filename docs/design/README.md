@@ -9,3 +9,4 @@ decided, and `device/` screenshots from the Karoo (`NN-what-light|dark.png`).
 | `arrow-head/` | Arrow head options (wings too long), shown on the device |
 | `screens/` | Clean screens and field images for visuals and the Karoo Artboard |
 | `settings/` | Settings screen: wind unit and arrow colour (options A/B) |
+| `long-press/` | No tap handler, so the Karoo's long-press (change field) works |
