@@ -1,13 +1,25 @@
 # Karoo ClearWind
 
-A small data field for the Hammerhead Karoo 3 that shows wind direction and speed, turned to the
-way you are riding, built to be read at a glance.
+A data field for the Hammerhead Karoo 3 that shows the wind turned to the way you ride, built to be
+read at a glance.
 
-Wind comes from Open-Meteo (free, no API key) for your current location, fetched through the
-Karoo's internet connection. Heading comes from the Karoo. Debug builds show demo data; release
-builds never do.
+![ClearWind in dark mode: the arrow coloured by wind speed, black/white and Karoo green](docs/images/clearwind-dark.webp)
+![ClearWind in light mode](docs/images/clearwind-light.webp)
 
-Read `../CLAUDE.md` (the Karoo playbook) first.
+- **Arrow:** points the way the wind blows (up = tailwind, down = headwind), as big as the field allows.
+- **Header like the Karoo's own fields:** wind icon left, wind speed right (`5.2 M/S`).
+- **Tap the field** to change the arrow colour: by wind speed (green → red), black/white, or Karoo green.
+- **Remote button actions:** switch units (m/s ↔ km/h) and switch arrow colour.
+
+Wind comes from Open-Meteo (free, no API key) for your location, every 10 minutes or after 5 km,
+fetched through the Karoo's Wi-Fi or the Hammerhead phone app; your position is rounded to about
+1 km. Heading comes from the Karoo. Debug builds show demo data; release builds never do.
+
+**Install:** download the APK from [Releases](https://github.com/Dubadai/karoo-clearwind/releases),
+sideload it, then add the field: Profiles → a ride page → tap a field → ClearWind.
+More in the [rider guide](docs/guide/README.md).
+
+Developers: read `../CLAUDE.md` (the Karoo playbook) first.
 
 ## Build and install
 
