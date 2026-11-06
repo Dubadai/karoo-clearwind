@@ -39,3 +39,12 @@ Bug found on the way: field taps never arrived. The tap PendingIntent was an act
 with `setPackage`, but `ActionReceiver` has no intent filter, so Android never delivered it. Fixed
 by naming the receiver class (`Intent(context, ActionReceiver::class.java)`), as karoo-interval
 does. Same fix applied to `karoo-starter`.
+
+Preview, round 2: the Karoo's floating back/play buttons are removed (both bottom fields are
+redrawn: ClearWind from the renderer's logic, Calories with its flame from the screenshot, header in
+IBM Plex Sans Condensed and the "0" copied from LAP AVG POWER). No captions or hint text. Under the
+devices: the field on its own, one row per arrow colour (light, then dark), four winds each. Tap
+the wind field on a device to cycle the colour.
+Header text in the mockups is 29 px (capitals 20 px, measured against the Karoo's own headers; 17 sp
+works out to ~29 px on the Karoo, not 31.9 px). At 31.9 px the redrawn CALORIES (POWER) looked
+crowded and heavy.

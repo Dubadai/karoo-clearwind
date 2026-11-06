@@ -21,8 +21,9 @@ object WindRenderer {
 
     private class Palette(val bg: Int, val text: Int)
 
-    private val LIGHT = Palette(Color.WHITE, 0xFF0B0B0B.toInt())
-    private val DARK = Palette(0xFF0B0B0B.toInt(), Color.WHITE)
+    // Pure black and white, like the Karoo's own fields (its header colour is plain black / white).
+    private val LIGHT = Palette(Color.WHITE, Color.BLACK)
+    private val DARK = Palette(Color.BLACK, Color.WHITE)
 
     /** Smooth speed scale: m/s → colour. */
     private val STOPS = listOf(
