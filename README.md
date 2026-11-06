@@ -9,7 +9,8 @@ read at a glance.
 - **Arrow:** points the way the wind blows (up = tailwind, down = headwind), as big as the field allows.
 - **Header like the Karoo's own fields:** wind icon left, wind speed right (`5.2 M/S`).
 - **Tap the field** to change the arrow colour: by wind speed (green → red), black/white, or Karoo green.
-- **Remote button actions:** switch units (m/s ↔ km/h) and switch arrow colour.
+- **Settings in the Karoo's app list:** wind speed in knots, m/s, km/h or mph, and the arrow colour.
+- **Remote button actions:** switch units and switch arrow colour.
 
 Wind comes from Open-Meteo (free, no API key) for your location, every 10 minutes or after 5 km,
 fetched through the Karoo's Wi-Fi or the Hammerhead phone app; your position is rounded to about

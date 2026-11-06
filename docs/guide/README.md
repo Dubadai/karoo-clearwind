@@ -18,9 +18,12 @@ It works at any field size.
 - The top row is like other Karoo fields: a wind icon on the left and the wind speed with its
   unit on the right (for example 5.2 M/S).
 
-**m/s or km/h:** put "Switch wind units" on a remote button (Settings → Controllers). There's
-also "Switch arrow colour" for a remote button, since taps on a field don't always arrive.
-Both choices are remembered.
+**Settings:** open ClearWind from the Karoo's app list to pick the wind speed unit (knots, m/s,
+km/h or mph; m/s to start with) and the arrow colour.
+
+**During a ride:** put "Switch wind units" on a remote button (Settings → Controllers) to step
+through the units. There's also "Switch arrow colour" for a remote button, since taps on a field
+don't always arrive. Every choice is remembered.
 
 **Where the wind comes from:** Open-Meteo weather for where you are, fetched through the Karoo's
 Wi-Fi or the Hammerhead phone app, every 10 minutes (sooner after 5 km). No account or key needed.

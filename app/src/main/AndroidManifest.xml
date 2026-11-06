@@ -6,6 +6,18 @@
         android:icon="@drawable/ic_app"
         android:label="@string/app_name">
 
+        <!-- Settings: wind unit and arrow colour. In the Karoo's app list. -->
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="true"
+            android:label="@string/app_short_name"
+            android:theme="@style/AppTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
         <service
             android:name=".ClearWindExtension"
             android:exported="true"

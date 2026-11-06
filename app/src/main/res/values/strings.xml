@@ -4,6 +4,15 @@
     <string name="extension_name">Karoo ClearWind</string>
     <string name="field_name">ClearWind</string>
     <string name="field_description">Wind direction and speed, turned to your heading</string>
-    <string name="action_toggle_units">Switch wind units (m/s ↔ km/h)</string>
+    <string name="action_toggle_units">Switch wind units</string>
     <string name="action_arrow_colour">Switch arrow colour</string>
+    <string name="app_short_name">ClearWind</string>
+    <string name="back">Back</string>
+    <string name="setting_unit">Wind speed unit</string>
+    <string name="setting_unit_help">A remote button set to \"Switch wind units\" changes it during a ride.</string>
+    <string name="setting_colour">Arrow colour</string>
+    <string name="colour_speed">Speed</string>
+    <string name="colour_plain">Plain</string>
+    <string name="colour_green">Green</string>
+    <string name="setting_colour_help">Speed goes from green to red as the wind picks up. Tap the field during a ride to switch.</string>
 </resources>

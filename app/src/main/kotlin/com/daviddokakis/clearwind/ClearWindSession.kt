@@ -35,15 +35,16 @@ class ClearWindSession(private val context: Context, private val karoo: KarooSys
 
     // One thread for all state changes, so updates never race.
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default.limitedParallelism(1))
-    private val prefs = context.getSharedPreferences("clearwind", Context.MODE_PRIVATE)
     private val _state = MutableStateFlow(
-        ClearWindState(
-            kmh = prefs.getBoolean(KEY_KMH, false),
-            arrowColour = runCatching { ClearWindState.ArrowColour.valueOf(prefs.getString(KEY_ARROW_COLOUR, null)!!) }
-                .getOrDefault(ClearWindState.ArrowColour.SPEED),
-        ),
+        ClearWindState(unit = Settings.unit(context), arrowColour = Settings.arrowColour(context)),
     )
     val state: StateFlow<ClearWindState> = _state
+
+    // The settings screen writes the same preferences: pick its changes up at once.
+    // (Kept in a field: SharedPreferences only holds listeners weakly.)
+    private val prefsListener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, _ ->
+        scope.launch { _state.update { it.copy(unit = Settings.unit(context), arrowColour = Settings.arrowColour(context)) } }
+    }
 
     private var lat: Double? = null
     private var lng: Double? = null
@@ -52,6 +53,7 @@ class ClearWindSession(private val context: Context, private val karoo: KarooSys
     private var fetchedLng = 0.0
 
     fun start() {
+        Settings.prefs(context).registerOnSharedPreferenceChangeListener(prefsListener)
         scope.launch {
             karoo.consumerFlow<OnLocationChanged>().collect { loc ->
                 lat = loc.lat
@@ -74,23 +76,26 @@ class ClearWindSession(private val context: Context, private val karoo: KarooSys
         }
     }
 
-    fun stop() = scope.cancel()
+    fun stop() {
+        Settings.prefs(context).unregisterOnSharedPreferenceChangeListener(prefsListener)
+        scope.cancel()
+    }
 
     /** Field tap or remote button: arrow colour speed → black/white → Karoo green, remembered. */
     fun cycleArrowColour() {
         scope.launch {
             _state.update { it.copy(arrowColour = it.arrowColour.next()) }
-            prefs.edit().putString(KEY_ARROW_COLOUR, _state.value.arrowColour.name).apply()
+            Settings.setArrowColour(context, _state.value.arrowColour)
             Timber.i("Arrow colour: ${_state.value.arrowColour}")
         }
     }
 
-    /** Remote button: m/s ↔ km/h, remembered. */
+    /** Remote button: next unit (knots → m/s → km/h → mph), remembered. */
     fun toggleUnits() {
         scope.launch {
-            _state.update { it.copy(kmh = !it.kmh) }
-            prefs.edit().putBoolean(KEY_KMH, _state.value.kmh).apply()
-            Timber.i("Units: ${if (_state.value.kmh) "km/h" else "m/s"}")
+            _state.update { it.copy(unit = it.unit.next()) }
+            Settings.setUnit(context, _state.value.unit)
+            Timber.i("Units: ${_state.value.unit.label}")
         }
     }
 
@@ -162,8 +167,6 @@ class ClearWindSession(private val context: Context, private val karoo: KarooSys
     }
 
     companion object {
-        private const val KEY_KMH = "kmh"
-        private const val KEY_ARROW_COLOUR = "arrow_colour"
         private const val REFRESH_MS = 10 * 60_000L
         private const val REFETCH_DISTANCE_M = 5_000.0
         private const val CHECK_MS = 15_000L
