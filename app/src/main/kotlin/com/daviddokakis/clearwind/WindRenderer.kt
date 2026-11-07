@@ -12,18 +12,18 @@ import kotlin.math.max
 import kotlin.math.min
 
 /**
- * Draws the whole field into a bitmap (see docs/design/field/README.md): plain white (black at
- * night) field, the Karoo-style wind arrow dead centre and as big as the field allows without
+ * Draws the whole field into a bitmap (see docs/design/field/README.md) on a transparent
+ * background, so the Karoo's own tile (rounded corners, border, white or black) shows through, the Karoo-style wind arrow dead centre and as big as the field allows without
  * touching the header, coloured by wind speed on a smooth green → red scale.
  * A Karoo-style header on top: wind icon left, speed with unit right ("5.2 M/S").
  */
 object WindRenderer {
 
-    private class Palette(val bg: Int, val text: Int)
+    private class Palette(val text: Int)
 
     // Pure black and white, like the Karoo's own fields (its header colour is plain black / white).
-    private val LIGHT = Palette(Color.WHITE, Color.BLACK)
-    private val DARK = Palette(Color.BLACK, Color.WHITE)
+    private val LIGHT = Palette(Color.BLACK)
+    private val DARK = Palette(Color.WHITE)
 
     /** Smooth speed scale: m/s → colour. */
     private val STOPS = listOf(
@@ -54,8 +54,6 @@ object WindRenderer {
     private const val ICON_LEFT = 12f
     private const val ICON_TOP = 12f
     private const val TEXT_RIGHT = 10f
-
-    fun background(night: Boolean): Int = (if (night) DARK else LIGHT).bg
 
     fun speedColor(ms: Double): Int {
         val v = ms.coerceIn(0.0, STOPS.last().first)
@@ -106,8 +104,7 @@ object WindRenderer {
         val w = max(width, 40)
         val h = max(height, 40)
         val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
-        val c = Canvas(bmp)
-        c.drawColor(p.bg)
+        val c = Canvas(bmp) // left transparent: the Karoo draws the tile behind it
 
         // Header: icon left, "5.2 M/S" right, both centred on the same line.
         val mid = ICON_TOP + ICON_PX / 2f
