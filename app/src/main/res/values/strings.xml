@@ -8,6 +8,7 @@
     <string name="action_arrow_colour">Switch arrow colour</string>
     <string name="app_short_name">ClearWind</string>
     <string name="back">Back</string>
+    <string name="settings">Settings</string>
     <string name="example">Example</string>
     <string name="example_description">Example of the wind field with these settings: wind %1$s, arrow pointing ahead to the right.</string>
     <string name="setting_unit">Wind speed unit</string>
