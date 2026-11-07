@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- The whole field is one bitmap (dial, arrow, speed) drawn by WindRenderer.
-     RemoteViews-safe widgets only. The root takes the background colour too, so if the Karoo makes
-     the field a bit smaller than it said, there's no gap. Nothing in the field is clickable,
+     RemoteViews-safe widgets only. No background anywhere: the Karoo draws the tile (rounded
+     corners, border, white or black) and a solid colour here would cover its corners. Nothing in the field is clickable,
      so the Karoo's long-press (change data field) keeps working. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/root"

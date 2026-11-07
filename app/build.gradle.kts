@@ -22,8 +22,8 @@ android {
         applicationId = "com.daviddokakis.clearwind"
         minSdk = 26
         targetSdk = 34
-        versionCode = 3
-        versionName = "0.2.1"
+        versionCode = 4
+        versionName = "0.2.2"
         // Where the Karoo and UpdateCheck find the latest version. To test the update notice,
         // build with -PmanifestUrl=http://localhost:8791/manifest.json (BetterIntervals' README,
         // "Update notices").

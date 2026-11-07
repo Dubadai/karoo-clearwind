@@ -1,6 +1,7 @@
 package com.daviddokakis.clearwind
 
 import android.app.Activity
+import android.content.res.Configuration
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.Gravity
@@ -22,6 +23,7 @@ import com.daviddokakis.clearwind.ClearWindState.WindUnit
 class SettingsActivity : Activity() {
 
     private lateinit var form: LinearLayout
+    private lateinit var example: ExampleCard
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +54,9 @@ class SettingsActivity : Activity() {
                 setPadding(dp(12), dp(4), dp(12), dp(4))
             },
         )
+        // The field as these settings draw it; stays at the top while the settings scroll.
+        example = ExampleCard(this)
+        root.addView(example, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { setMargins(dp(12), dp(4), dp(12), dp(4)) })
         root.addView(ScrollView(this).apply { addView(form, MATCH_PARENT, WRAP_CONTENT) }, LinearLayout.LayoutParams(MATCH_PARENT, 0, 1f))
         setContentView(root)
     }
@@ -62,6 +67,7 @@ class SettingsActivity : Activity() {
     }
 
     private fun render() {
+        showExample()
         form.removeAllViews()
 
         form.addView(heading(R.drawable.ic_wind, getString(R.string.setting_unit)))
@@ -89,6 +95,19 @@ class SettingsActivity : Activity() {
             },
         )
         form.addView(help(getString(R.string.setting_colour_help)))
+    }
+
+    /** The wind field with made-up wind (5.2 m/s, from behind on the left), at a Karoo half-width tile's size. */
+    private fun showExample() {
+        val s = ClearWindState(
+            windSpeedMs = 5.2, windFromDeg = 225.0, headingDeg = 0.0,
+            unit = Settings.unit(this), arrowColour = Settings.arrowColour(this),
+        )
+        val night = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+        example.show(
+            WindRenderer.render(s, EXAMPLE_W, EXAMPLE_H, night),
+            getString(R.string.example_description, "${s.speedText} ${s.unit.label}"),
+        )
     }
 
     /** Icon + title, like the Karoo's settings headings. */
@@ -149,4 +168,10 @@ class SettingsActivity : Activity() {
     }
 
     private fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
+
+    private companion object {
+        /** A half-width, one-row field on the Karoo 3 (pixels). */
+        const val EXAMPLE_W = 238
+        const val EXAMPLE_H = 158
+    }
 }
