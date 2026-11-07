@@ -5,8 +5,10 @@ Listed on the Karoo as **DDB ClearWind**, next to David's other apps.
 A data field for the Hammerhead Karoo 3 that shows the wind turned to the way you ride, built to be
 read at a glance.
 
-![ClearWind in dark mode: the arrow coloured by wind speed, black/white and Karoo green](docs/images/clearwind-dark.webp)
-![ClearWind in light mode](docs/images/clearwind-light.webp)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/clearwind-dark.jpg">
+  <img src="docs/images/clearwind-light.jpg" alt="ClearWind on three Karoo 3s during a ride: the arrow coloured by wind speed in a small field, plain in a quarter field, Karoo green in a half-page field">
+</picture>
 
 - **Arrow:** points the way the wind blows (up = tailwind, down = headwind), as big as the field allows.
 - **Header like the Karoo's own fields:** wind icon left, wind speed right (`5.2 M/S`).
