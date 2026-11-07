@@ -8,6 +8,9 @@ and dark, drawn by the field's own code on the Karoo 3 emulator (no Karoo needed
 - `artboard/…` (not in git): in the Karoo 3 frame on the Artboard's Sand (light) or Night (dark)
   gradient, 1920 × 1080
 
+Pages show data field boundaries on, the Karoo's icons and a ride in progress with the showcase
+values (design-assets/tools/field-gallery/showcase.json).
+
 Sizes: `full` 478×721, `half` 478×336, `row` 478×141, `quarter` 238×168, `small` 236×141.
 Make them again (about a minute):
 
