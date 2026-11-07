@@ -72,7 +72,6 @@ class ClearWindDataType(
         val night = (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
             Configuration.UI_MODE_NIGHT_YES
         val v = RemoteViews(context.packageName, R.layout.field_main)
-        v.setInt(R.id.root, "setBackgroundColor", WindRenderer.background(night))
         v.setImageViewBitmap(R.id.dial, WindRenderer.render(s, w, h, night))
         // No tap handler on purpose: a clickable field swallows the touch, so the Karoo's own
         // long-press (change data field) never starts. Colour is changed in Settings or by remote.
