@@ -4,6 +4,10 @@ plugins {
     alias(libs.plugins.android.application)
 }
 
+// GitHub release assets: the APK is always clearwind.apk, so these links always point at the newest
+// (non-pre-)release.
+val RELEASES = "https://github.com/Dubadai/karoo-clearwind/releases/latest/download"
+
 // Release signing key, kept out of git. See README "Releases".
 val keystoreProps = Properties().apply {
     val f = rootProject.file("keystore.properties")
@@ -20,6 +24,11 @@ android {
         targetSdk = 34
         versionCode = 4
         versionName = "0.2.2"
+        // Where the Karoo and UpdateCheck find the latest version. To test the update notice,
+        // build with -PmanifestUrl=http://localhost:8791/manifest.json (BetterIntervals' README,
+        // "Update notices").
+        manifestPlaceholders["manifestUrl"] =
+            (project.findProperty("manifestUrl") as String?) ?: "$RELEASES/manifest.json"
     }
 
     signingConfigs {
@@ -53,4 +62,34 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.timber)
+}
+
+// manifest.json for the GitHub release (upload it next to clearwind.apk). The Karoo's Settings › Apps
+// page and UpdateCheck read it to offer the update.
+//   ./gradlew -q :app:releaseManifest -PreleaseNotes="What's new…"
+tasks.register("releaseManifest") {
+    group = "release"
+    description = "Writes build.nosync/manifest.json for the GitHub release"
+    val out = layout.buildDirectory.file("manifest.json")
+    val code = android.defaultConfig.versionCode
+    val name = android.defaultConfig.versionName
+    val appId = android.defaultConfig.applicationId
+    val notes = (project.findProperty("releaseNotes") as String?).orEmpty()
+    outputs.file(out)
+    outputs.upToDateWhen { false }
+    doLast {
+        val manifest = mapOf(
+            "label" to "DDB ClearWind",
+            "packageName" to appId,
+            "latestApkUrl" to "$RELEASES/clearwind.apk",
+            "latestVersion" to name,
+            "latestVersionCode" to code,
+            "developer" to "github.com/Dubadai",
+            "description" to "Wind arrow turned to the way you ride, with wind speed.",
+            "releaseNotes" to notes,
+        )
+        val f = out.get().asFile
+        f.writeText(groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(manifest)) + "\n")
+        println("Wrote $f ($name, $code)")
+    }
 }
