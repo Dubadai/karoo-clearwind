@@ -8,6 +8,8 @@ import com.daviddokakis.clearwind.ClearWindState.WindUnit
 /** DEBUG ONLY: what the field gallery (FieldGallery.kt) draws: the wind field in each arrow colour. */
 object GalleryFields {
     val variants = listOf("speed", "plain", "green")
+    /** Every Karoo size. */
+    val sizes: List<String>? = null
 
     fun render(context: Context, variant: String, w: Int, h: Int, night: Boolean): Bitmap {
         val colour = when (variant) { "plain" -> ArrowColour.MONO; "green" -> ArrowColour.GREEN; else -> ArrowColour.SPEED }

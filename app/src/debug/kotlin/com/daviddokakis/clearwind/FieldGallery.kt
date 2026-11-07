@@ -49,7 +49,9 @@ object FieldGallery {
         out.mkdirs()
         out.listFiles()?.forEach { it.delete() }
         useKarooFonts(context)
-        for (variant in GalleryFields.variants) for ((size, wh) in SIZES) for (night in listOf(false, true)) {
+        // GalleryFields.sizes: the sizes this app's fields are made for (null: all of them)
+        val sizes = GalleryFields.sizes?.let { wanted -> SIZES.filter { it.first in wanted } } ?: SIZES
+        for (variant in GalleryFields.variants) for ((size, wh) in sizes) for (night in listOf(false, true)) {
             val (w, h) = wh
             val c = withNight(context, night)
             val field = GalleryFields.render(c, variant, w, h, night)
@@ -61,7 +63,7 @@ object FieldGallery {
             val mode = if (night) "dark" else "light"
             FileOutputStream(File(out, "$variant-$size-$mode.png")).use { tile.compress(Bitmap.CompressFormat.PNG, 100, it) }
         }
-        File(out, "DONE").writeText("${GalleryFields.variants.size * SIZES.size * 2} fields")
+        File(out, "DONE").writeText("${GalleryFields.variants.size * sizes.size * 2} fields")
     }
 
     /** [base] in light or dark mode, so values-night/ colours resolve like on the Karoo. */
