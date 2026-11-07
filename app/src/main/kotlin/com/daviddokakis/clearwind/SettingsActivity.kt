@@ -31,34 +31,33 @@ class SettingsActivity : Activity() {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(12), 0, dp(12), dp(24))
         }
-        val root = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setBackgroundColor(getColor(R.color.settings_bg))
-        }
-        root.addView(
-            ImageView(this).apply {
-                setImageResource(R.drawable.ic_back)
-                contentDescription = getString(R.string.back)
-                scaleType = ImageView.ScaleType.CENTER
-                isClickable = true
-                setOnClickListener { finish() }
-                layoutParams = LinearLayout.LayoutParams(dp(48), dp(48)).apply { setMargins(dp(4), dp(8), 0, 0) }
-            },
-        )
-        root.addView(
-            TextView(this).apply {
-                text = getString(R.string.app_short_name)
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f)
-                setTextColor(getColor(R.color.settings_title))
-                setTypeface(typeface, android.graphics.Typeface.BOLD)
-                setPadding(dp(12), dp(4), dp(12), dp(4))
-            },
-        )
-        // The field as these settings draw it; stays at the top while the settings scroll.
+        // Bar with back arrow and "Settings" stays; the app's name scrolls away; the Example (the
+        // field as these settings draw it) then stays just under the bar.
         example = ExampleCard(this)
-        root.addView(example, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { setMargins(dp(12), dp(4), dp(12), dp(4)) })
-        root.addView(ScrollView(this).apply { addView(form, MATCH_PARENT, WRAP_CONTENT) }, LinearLayout.LayoutParams(MATCH_PARENT, 0, 1f))
-        setContentView(root)
+        setContentView(
+            SettingsLayout(
+                this,
+                back = ImageView(this).apply {
+                    setImageResource(R.drawable.ic_back)
+                    contentDescription = getString(R.string.back)
+                    scaleType = ImageView.ScaleType.CENTER
+                    isClickable = true
+                    setOnClickListener { finish() }
+                },
+                barTitle = getString(R.string.settings),
+                title = TextView(this).apply {
+                    text = getString(R.string.app_short_name)
+                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f)
+                    setTextColor(getColor(R.color.settings_title))
+                    setTypeface(typeface, android.graphics.Typeface.BOLD)
+                    setPadding(dp(12), dp(4), dp(12), dp(4))
+                },
+                card = example,
+                form = form,
+                pageColor = getColor(R.color.settings_bg),
+                textColor = getColor(R.color.settings_title),
+            ),
+        )
     }
 
     override fun onResume() {
