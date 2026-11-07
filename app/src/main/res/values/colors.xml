@@ -11,4 +11,9 @@
     <color name="settings_title">#FF1C2E2E</color>
     <color name="settings_help">#FF6F6F6F</color>
     <color name="settings_divider">#FFDDDDDD</color>
+    <!-- Settings: the "Example" card (ExampleCard) and the field tile inside it -->
+    <color name="example_card">#FFF1F1EF</color>
+    <color name="example_label">#FF6B6A66</color>
+    <color name="example_tile">#FFFFFFFF</color>
+    <color name="example_tile_border">#FFD5D4CF</color>
 </resources>

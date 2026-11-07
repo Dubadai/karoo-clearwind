@@ -9,5 +9,13 @@
                 <action android:name="com.daviddokakis.clearwind.DEBUG_REMOTE" />
             </intent-filter>
         </receiver>
+        <!-- Field gallery: the field at every Karoo size, light and dark (design-assets/tools/field-gallery) -->
+        <receiver
+            android:name=".FieldGalleryReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.daviddokakis.clearwind.DEBUG_GALLERY" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>
