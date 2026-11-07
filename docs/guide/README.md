@@ -4,7 +4,7 @@ Plain-language pages for riders, one per feature, with screenshots in `images/`.
 
 ## ClearWind field
 
-**Add it:** on the Karoo, Profiles → pick a profile → a ride page → tap a field → ClearWind.
+**Add it:** on the Karoo, Profiles → pick a profile → a ride page → tap a field → DDB ClearWind → ClearWind.
 It works at any field size.
 
 **Read it:**
@@ -18,7 +18,7 @@ It works at any field size.
 - The top row is like other Karoo fields: a wind icon on the left and the wind speed with its
   unit on the right (for example 5.2 M/S).
 
-**Settings:** open ClearWind from the Karoo's app list to pick the wind speed unit (knots, m/s,
+**Settings:** open DDB ClearWind from the Karoo's app list to pick the wind speed unit (knots, m/s,
 km/h or mph; m/s to start with) and the arrow colour.
 
 **During a ride:** put "Switch wind units" on a remote button (Settings → Controllers) to step
