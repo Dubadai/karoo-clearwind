@@ -15,4 +15,8 @@
     <string name="colour_plain">Plain</string>
     <string name="colour_green">Green</string>
     <string name="setting_colour_help">Speed goes from green to red as the wind picks up. Tap the field during a ride to switch.</string>
+    <!-- Update notices (UpdateCheck.kt) -->
+    <string name="update_header">Update available</string>
+    <string name="update_text">You have %1$s. Tap to see what\'s new and update.</string>
+    <string name="update_action">View</string>
 </resources>

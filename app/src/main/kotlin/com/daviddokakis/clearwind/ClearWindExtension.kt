@@ -3,12 +3,17 @@ package com.daviddokakis.clearwind
 import io.hammerhead.karooext.KarooSystemService
 import io.hammerhead.karooext.extension.DataTypeImpl
 import io.hammerhead.karooext.extension.KarooExtension
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import timber.log.Timber
 
 /** Entry point the Karoo system binds to. */
 class ClearWindExtension : KarooExtension(EXTENSION_ID, "1") {
 
     private lateinit var karoo: KarooSystemService
+    private val updateScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private lateinit var model: ClearWindSession
 
     override val types: List<DataTypeImpl> by lazy {
@@ -25,6 +30,8 @@ class ClearWindExtension : KarooExtension(EXTENSION_ID, "1") {
             Timber.i("Karoo system connected: $connected")
         }
         model.start()
+        // Not riding: tell the rider when a newer release is on GitHub (see UpdateCheck).
+        UpdateCheck(this, karoo, appName = "ClearWind").start(updateScope)
     }
 
     /** Remote buttons (assigned in the Karoo's controller settings). Always arrive, unlike field taps. */
@@ -39,6 +46,7 @@ class ClearWindExtension : KarooExtension(EXTENSION_ID, "1") {
     override fun onDestroy() {
         model.stop()
         session = null
+        updateScope.cancel()
         karoo.disconnect()
         super.onDestroy()
     }
