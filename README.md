@@ -1,4 +1,6 @@
-# Karoo ClearWind
+# ClearWind for Karoo 3
+
+Listed on the Karoo as **DDB ClearWind**, next to David's other apps.
 
 A data field for the Hammerhead Karoo 3 that shows the wind turned to the way you ride, built to be
 read at a glance.
@@ -17,8 +19,8 @@ Wind comes from Open-Meteo (free, no API key) for your location, every 10 minute
 fetched through the Karoo's Wi-Fi or the Hammerhead phone app; your position is rounded to about
 1 km. Heading comes from the Karoo. Debug builds show demo data; release builds never do.
 
-**Install:** download the APK from [Releases](https://github.com/Dubadai/karoo-clearwind/releases),
-sideload it, then add the field: Profiles → a ride page → tap a field → ClearWind.
+**Install:** download `clearwind.apk` from [Releases](https://github.com/Dubadai/karoo-clearwind/releases),
+sideload it, then add the field: Profiles → a ride page → tap a field → DDB ClearWind → ClearWind.
 More in the [rider guide](docs/guide/README.md).
 
 Developers: read `../CLAUDE.md` (the Karoo playbook) first.
