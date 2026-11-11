@@ -63,6 +63,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.timber)
+    testImplementation("junit:junit:4.13.2")
 }
 
 // manifest.json for the GitHub release (upload it next to clearwind.apk). The Karoo's Settings › Apps

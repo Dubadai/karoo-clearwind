@@ -2,6 +2,7 @@ package com.daviddokakis.clearwind
 
 import android.content.Context
 import android.os.SystemClock
+import com.dubadai.karoo.common.consumerFlow
 import io.hammerhead.karooext.KarooSystemService
 import io.hammerhead.karooext.models.ActiveRidePage
 import io.hammerhead.karooext.models.RideProfile

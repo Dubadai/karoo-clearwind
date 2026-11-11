@@ -15,7 +15,6 @@ import io.hammerhead.karooext.models.UpdateGraphicConfig
 import io.hammerhead.karooext.models.ViewConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -66,7 +65,12 @@ class ClearWindDataType(
             var lastRender = 0L
             var shown: Key? = null
             var wasOnScreen = true
+            // Sleep until the wind or the page on screen changes (karoo-common FieldPacer), no polling
+            val pace = FieldPacer(listOf(session.state, session.activePage))
+            val pagePace = FieldPacer(listOf(session.activePage))
             while (isActive) {
+                pace.mark()
+                pagePace.mark()
                 // Only draw while this field's page is on screen (see ClearWindSession.activePage).
                 // Coming back on screen: draw at once.
                 val onScreen = onScreen(config)
@@ -76,7 +80,7 @@ class ClearWindDataType(
                     if (onScreen) shown = null
                 }
                 if (!onScreen) {
-                    delay(POLL_MS)
+                    pagePace.sleep(FieldPacer.CAP_MS)
                     continue
                 }
                 val s = session.state.value
@@ -91,7 +95,7 @@ class ClearWindDataType(
                     }
                     lastRender = SystemClock.elapsedRealtime()
                 }
-                delay(POLL_MS)
+                pace.sleep(FieldPacer.nextMs(key != shown, SystemClock.elapsedRealtime() - lastRender, MIN_GAP_MS, IDLE_REDRAW_MS))
             }
         }
         emitter.setCancellable {
@@ -153,7 +157,6 @@ class ClearWindDataType(
         private val TILE_DARK_FLAT = intArrayOf(R.drawable.tile_dark_0_flat, R.drawable.tile_dark_1_flat, R.drawable.tile_dark_2_flat, R.drawable.tile_dark_3_flat, R.drawable.tile_dark_4_flat, R.drawable.tile_dark_5_flat)
         private const val MIN_GAP_MS = 920L
         private const val IDLE_REDRAW_MS = 5_000L
-        private const val POLL_MS = 40L
         /** The wind shown in the page editor's preview (like the Settings example). */
         private val EXAMPLE = ClearWindState(windSpeedMs = 5.2, windGustMs = 9.0, windFromDeg = 225.0, headingDeg = 0.0)
         private val nextViewId = java.util.concurrent.atomic.AtomicInteger()
