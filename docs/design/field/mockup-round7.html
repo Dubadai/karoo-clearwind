@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ClearWind field mockup</title>
+<style>
+  :root { --page:#ECEAE4; --ink:#1B1B1A; --muted:#5F5E5A; }
+  body { margin:0; background:var(--page); color:var(--ink);
+         font:15px/1.45 -apple-system, "Helvetica Neue", Arial, sans-serif; padding:24px 16px 60px; }
+  h1 { font-size:24px; margin:0 0 4px; }
+  h2 { font-size:19px; margin:40px 0 4px; }
+  p.lead { margin:0 0 6px; color:var(--muted); max-width:780px; }
+  .row { display:flex; flex-wrap:wrap; gap:18px; margin-top:6px; align-items:flex-start; }
+  .cap { font-size:12px; color:var(--muted); margin-top:18px; }
+  .field { position:relative; overflow:hidden; border-radius:4px; box-shadow:0 0 0 1px #0002;
+           font-family:"Helvetica Neue", Arial, sans-serif; color:#fff; box-sizing:border-box; }
+  .light.head  { background:#C2361B; } .light.cross { background:#B36A00; } .light.tail { background:#2F8A3E; }
+  .dark.head   { background:#9E2A14; } .dark.cross  { background:#8F5500; } .dark.tail  { background:#256E31; }
+  .num { font-weight:800; letter-spacing:-1.5px; line-height:.85; }
+  .unit { font-weight:700; opacity:.75; }
+  .notes { max-width:780px; margin-top:12px; } .notes li { margin:4px 0; }
+  .toggle { display:inline-flex; margin:10px 0 0; border:1px solid #0003; border-radius:8px; overflow:hidden; }
+  .toggle button { font:inherit; border:0; padding:6px 14px; background:#fff; cursor:pointer; }
+  .toggle button.on { background:#1B1B1A; color:#fff; }
+</style>
+</head>
+<body>
+<h1>ClearWind: field mockup, final</h1>
+<p class="lead">Final: arrow as big as the card allows, dead centre. Speed in the top-right corner, no unit text (the unit is still switchable).</p>
+<p class="lead">Examples: headwind 5 m/s (from 20° right), crosswind 3.3 m/s (from the left), quartering tailwind 4.2 m/s (from behind left), tailwind 6.1 m/s.</p>
+<div class="toggle" id="unitToggle"><button data-u="ms" class="on">m/s</button><button data-u="kmh">km/h</button></div>
+
+<h2>Arrow centred, speed top right</h2>
+<p class="lead">The guide lines in the first card show the centre lines.</p>
+<div id="LC"></div>
+
+<h2>Unchanged</h2>
+<ul class="notes">
+  <li>Tap the field or use the remote action "Switch wind units" to switch m/s ↔ km/h; remembered.</li>
+  <li><b>No data yet:</b> grey tile, grey arrow, speed "–".</li>
+</ul>
+
+<script>
+const S = [
+  { key:'head',  ms:5.0, rel:20   },
+  { key:'cross', ms:3.3, rel:-90  },
+  { key:'tail',  ms:4.2, rel:-140 },
+  { key:'tail',  ms:6.1, rel:175  },
+];
+const sizes = [
+  { w:239, h:180, label:'Small (¼ page)' },
+  { w:239, h:120, label:'Smallest (⅛ page)' },
+  { w:478, h:120, label:'Wide row' },
+];
+let unit = 'ms';
+function fmt(ms){
+  if (unit==='kmh') return { n:String(Math.round(ms*3.6)), u:'km/h' };
+  return { n: ms < 10 ? ms.toFixed(1) : String(Math.round(ms)), u:'m/s' };
+}
+function angle(rel){ let t = ((rel + 180) % 360 + 360) % 360; return t > 180 ? t - 360 : t; } // 0 = ahead
+function arcSvg(t, R, endDot=true){
+  if (Math.abs(t) <= 4) return '';
+  const rad = t * Math.PI / 180, ex = (R*Math.sin(rad)).toFixed(2), ey = (-R*Math.cos(rad)).toFixed(2);
+  return `<path d="M0,${-R} A${R},${R} 0 0 ${t > 0 ? 1 : 0} ${ex},${ey}" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="3" stroke-linecap="round"/>`
+       + (endDot ? `<circle cx="${ex}" cy="${ey}" r="3.5" fill="#fff" fill-opacity=".8"/>` : '');
+}
+// Layout A dial: arrow in the middle
+function dialA(rel, size){
+  const t = angle(rel), R = 43;
+  return `<svg width="${size}" height="${size}" viewBox="-50 -50 100 100" style="flex:none;display:block">
+    ${arcSvg(t, R)}<circle cx="0" cy="${-R}" r="6" fill="#fff"/>
+    <g transform="rotate(${t})" fill="none" stroke="#fff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M0,29 L0,-23"/><path d="M-16,-9 L0,-25 L16,-9"/></g></svg>`;
+}
+// Layout B dial: arrowhead on the edge, number goes in the middle
+function dialB(rel, size){
+  const t = angle(rel), R = 40;
+  return `<svg width="${size}" height="${size}" viewBox="-50 -50 100 100" style="display:block">
+    ${arcSvg(t, R, false)}<circle cx="0" cy="${-R}" r="5.5" fill="#fff"/>
+    <g transform="rotate(${t})" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M-13,-31 L0,-44 L13,-31"/></g></svg>`;
+}
+function layoutC(s, sz, theme, guides){
+  const f = fmt(s.ms);
+  const big = sz.w > 300 ? 46 : (sz.h > 150 ? 40 : 34);
+  const a = Math.min(sz.h - 8, sz.w - 8);
+  const g = guides ? `<div style="position:absolute;left:50%;top:0;bottom:0;border-left:1px dashed #fff8"></div>
+                      <div style="position:absolute;top:50%;left:0;right:0;border-top:1px dashed #fff8"></div>` : '';
+  return `<div class="field ${theme} ${s.key}" style="width:${sz.w}px;height:${sz.h}px">
+      ${g}
+      <div style="position:absolute;left:${(sz.w-a)/2}px;top:${(sz.h-a)/2}px">${dialA(s.rel, a)}</div>
+      <div class="num" style="position:absolute;right:10px;top:22px;font-size:${big}px">${f.n}</div>
+    </div>`;
+}
+function render(){
+  for (const [id, fn] of [['LC',layoutC]]) {
+    let html = '';
+    for (const sz of sizes) for (const theme of ['light','dark']) {
+      html += `<div class="cap">${sz.label}, ${sz.w}×${sz.h} px, ${theme} mode</div><div class="row">`;
+      S.forEach((s,i) => html += fn(s, sz, theme, i===0 && theme==='light'));
+      html += '</div>';
+    }
+    document.getElementById(id).innerHTML = html;
+  }
+}
+document.querySelectorAll('#unitToggle button').forEach(b => b.onclick = () => {
+  unit = b.dataset.u;
+  document.querySelectorAll('#unitToggle button').forEach(x => x.classList.toggle('on', x===b));
+  render();
+});
+render();
+</script>
+</body>
+</html>

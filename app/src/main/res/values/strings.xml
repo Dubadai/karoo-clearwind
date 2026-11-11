@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DDB ClearWind</string>
+    <string name="extension_name">DDB ClearWind</string>
+    <string name="field_name">ClearWind</string>
+    <string name="field_description">Wind direction and speed, turned to your heading</string>
+    <string name="action_toggle_units">Switch wind units</string>
+    <string name="action_arrow_colour">Switch arrow colour</string>
+    <string name="app_short_name">ClearWind</string>
+    <string name="example_description">Example of the wind field with these settings: wind %1$s, arrow pointing ahead to the right.</string>
+    <string name="setting_unit">Wind speed unit</string>
+    <string name="setting_unit_help">A remote button set to \"Switch wind units\" changes it during a ride.</string>
+    <string name="setting_colour">Arrow colour</string>
+    <string name="colour_speed">Speed</string>
+    <string name="colour_plain">Plain</string>
+    <string name="colour_green">Green</string>
+    <string name="setting_colour_help">Speed goes from green to red as the wind picks up. Tap the field during a ride to switch.</string>
+    <string name="setting_tile">Tile colour</string>
+    <string name="setting_colour_tiled_help">With a coloured tile the arrow is black (white at night), so it stays easy to read.</string>
+    <string name="tile_off">Off</string>
+    <string name="tile_wind">Wind strength</string>
+    <string name="setting_tile_help">Colours the whole tile, from green in calm air to purple in a gale. Text and arrow stay black (white at night).</string>
+    <string name="setting_gusts">Show gusts</string>
+    <string name="setting_gusts_help">The strongest gust in brackets after the speed: 5.2 (9) m/s.</string>
+</resources>

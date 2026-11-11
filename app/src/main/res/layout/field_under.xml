@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The field when the arrow sits under the header (most tiles). Two pictures drawn by WindRenderer:
+     - header: icon and "5.2 M/S", shown at 1:1 (scaleType matrix never scales), so it stays the
+       size and place of the Karoo's own headers even when the Karoo shows the field shorter than
+       the size it reported (route or workout bar on screen);
+     - arrow: fills the rest; centerInside shrinks it if that space is smaller than expected.
+     No backgrounds (the Karoo draws the tile) and nothing clickable (long-press must reach the
+     Karoo). RemoteViews-safe widgets only. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <ImageView
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scaleType="matrix" />
+
+    <ImageView
+        android:id="@+id/arrow"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:scaleType="centerInside" />
+</LinearLayout>

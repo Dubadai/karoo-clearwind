@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ClearWind arrow A2</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin:0; }
+  body { background:#2A2A2A; padding:48px 16px 64px; box-sizing:border-box; }
+  .stage { display:grid; justify-items:center; gap:56px; }
+  .devices { display:flex; flex-wrap:wrap; justify-content:center; gap:40px; }
+  .devices canvas { cursor:pointer; }
+  .tiles { display:grid; gap:20px; justify-items:center; }
+  .tiles .row { display:flex; flex-wrap:nowrap; justify-content:center; gap:14px; }
+  .tiles canvas { border-radius:4px; width:min(238px, calc((100vw - 74px) / 4)); height:auto; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="devices" id="devices"></div>
+  <div class="tiles" id="tiles"></div>
+</div>
+
+<script>/*__KAROO_DEVICE_JS__*/</script>
+<script>
+const FRAME = "__FRAME__", SCREEN = "__SCREEN__", SCREEN_DARK = "__SCREEN_DARK__";
+
+/*__FIELD_JS__*/
+
+/* ---------- The ride page without the Karoo's floating back / play buttons ---------- */
+
+// Bottom row of the screenshot: ClearWind (left) and Calories (right), both 142 px tall at y 635.
+// The Karoo's buttons float over both, so both fields are redrawn here.
+function cleanBottomRow(ctx, screenImg, { dark, ms, deg, colour }) {
+  // Left: ClearWind.
+  ctx.save(); ctx.translate(0, 635); drawField(ctx, 238, 142, { dark, ms, deg, colour }); ctx.restore();
+  ctx.fillStyle = dark ? '#000000' : '#FFFFFF';
+  ctx.fillRect(0, 777, 240, 23);
+  // Right: Calories (power), like the other two-line fields: flame from the screenshot,
+  // header in the Karoo's font, value "0" copied from LAP AVG POWER (same layout, 432 px higher).
+  ctx.fillStyle = dark ? '#000000' : '#FFFFFF';
+  ctx.fillRect(240, 635, 240, 165);
+  ctx.drawImage(screenImg, 250, 650, 30, 34, 250, 650, 30, 34);
+  ctx.font = HEADER_FONT; ctx.textAlign = 'right'; ctx.fillStyle = dark ? '#FFFFFF' : '#000000';
+  const caps = ctx.measureText('M').actualBoundingBoxAscent;
+  ctx.fillText('CALORIES', 470, 646 + caps);
+  ctx.fillText('(POWER)', 470, 669 + caps);
+  ctx.drawImage(screenImg, 428, 265, 46, 72, 428, 265 + 432, 46, 72);
+}
+
+/* ---------- Page ---------- */
+
+const loadImg = src => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.src = src; });
+
+function tile(opt, scale = 1) {
+  const w = 238, h = 142, dpr = window.devicePixelRatio || 1;
+  const c = document.createElement('canvas');
+  c.width = w * scale * dpr; c.height = h * scale * dpr;
+  const ctx = c.getContext('2d'); ctx.scale(scale * dpr, scale * dpr);
+  drawField(ctx, w, h, opt);
+  return c;
+}
+
+(async () => {
+  await document.fonts.load(HEADER_FONT);
+  const modes = [
+    { dark: false, dev: await KarooDevice.load({ frame: FRAME, screen: SCREEN }), img: await loadImg(SCREEN) },
+    { dark: true, dev: await KarooDevice.load({ frame: FRAME, screen: SCREEN_DARK }), img: await loadImg(SCREEN_DARK) },
+  ];
+
+  // Devices: tap the wind field to cycle the arrow colour.
+  let colour = 0;
+  const holder = document.getElementById('devices');
+  function renderDevices() {
+    holder.replaceChildren(...modes.map(m => {
+      const scr = m.dev.screen({ scale: 2, draw: ctx => cleanBottomRow(ctx, m.img, { dark: m.dark, ms: 5.2, deg: 45, colour: COLOURS[colour] }) });
+      const canvas = m.dev.device(scr, 340);
+      canvas.addEventListener('click', e => {
+        const k = 340 / 1100, r = canvas.getBoundingClientRect();
+        const sx = ((e.clientX - r.left) / k - 177) * 480 / 745, sy = ((e.clientY - r.top) / k - 215) * 800 / 1232;
+        if (sx >= 0 && sx <= 238 && sy >= 635 && sy <= 777) { colour = (colour + 1) % COLOURS.length; renderDevices(); }
+      });
+      return canvas;
+    }));
+  }
+  renderDevices();
+
+  // Field on its own: one row per arrow colour, light then dark, a few winds.
+  const winds = [{ ms: 2.1, deg: 10 }, { ms: 5.2, deg: -90 }, { ms: 7.8, deg: 140 }, { ms: 11.6, deg: -170 }];
+  const tiles = document.getElementById('tiles');
+  for (const c of COLOURS) for (const dark of [false, true]) {
+    const row = document.createElement('div'); row.className = 'row';
+    for (const w of winds) row.append(tile({ dark, colour: c, ...w }));
+    tiles.append(row);
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+.gradle/
+build/
+build.nosync/
+local.properties
+.idea/
+*.iml
+.DS_Store
+captures/
+.kotlin/
+
+# Release signing key and its passwords: never commit these
+keystore.properties
+*.jks
+*.keystore
+
+# Design files kept local: reference pictures from others, and built mockup pages that embed the
+# Karoo 3 device image (rebuild them with docs/design/arrow-head/build.py)
+docs/design/field/inspiration/
+docs/design/arrow-head/mockup.html
+docs/design/arrow-head/preview.html
+docs/design/settings/mockup.html
+
+# Field gallery: the big framed images are made on demand (design-assets/tools/field-gallery)
+docs/design/gallery/artboard/

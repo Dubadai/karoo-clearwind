@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ClearWind settings</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@500;600&family=IBM+Plex+Sans+Condensed:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin:0; }
+  body { background:#2A2A2A; color:#C9C6C0; font:14px/1.4 -apple-system, "Helvetica Neue", Arial, sans-serif;
+         padding:40px 16px 64px; box-sizing:border-box; }
+  .stage { display:grid; justify-items:center; gap:48px; }
+  .option { display:grid; justify-items:center; gap:18px; }
+  .tag { font-size:15px; font-weight:600; color:#E8E6E1; }
+  .row { display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:32px; }
+  .row canvas.dev { cursor:pointer; }
+  .tiles { display:grid; gap:14px; }
+  .tiles canvas { border-radius:4px; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage"></div>
+
+<script>/*__KAROO_DEVICE_JS__*/</script>
+<script>/*__FIELD_JS__*/</script>
+<script>
+const FRAME = "__FRAME__", BASE = { light: "__BASE_LIGHT__", dark: "__BASE_DARK__" };
+
+/* ---------- The settings page, in the Karoo's own style (as karoo-interval's Settings) ---------- */
+
+// Measured on the Karoo (karoo-interval Settings, 480×800): title, section heading, segmented
+// control (78 px pill track, selected pill inset 3 px), grey help text (32 px lines), divider.
+const PAL = {
+  light: { bg:'#FFFFFF', title:'#1C2E2E', track:'#F4F4F4', sel:'#9FB3BD', seg:'#243535', help:'#6F6F6F', div:'#DDDDDD' },
+  dark:  { bg:'#0B0B0B', title:'#F2F2F2', track:'#2A2A2A', sel:'#5E7783', seg:'#F2F2F2', help:'#B4B2A9', div:'#3A3A38' },
+};
+const UI = '"IBM Plex Sans"';
+
+function arrowIcon(ctx, x, y, size, color) {            // section icon: the field's arrow
+  ctx.save(); ctx.translate(x + size / 2, y + size / 2); ctx.scale(size / 17, size / 17);
+  ctx.rotate(Math.PI / 4); ctx.translate(-12, -12); ctx.fillStyle = color; ctx.fill(ARROW); ctx.restore();
+}
+function windHeadingIcon(ctx, x, y, size, color) {       // section icon: the field's wind icon
+  ctx.save(); ctx.translate(x - ICON_LEFT * size / 23, y - ICON_TOP * size / 23); ctx.scale(size / 23, size / 23);
+  windIcon(ctx, color); ctx.restore();
+}
+function wrap(ctx, text, maxW) {
+  const words = text.split(' '), lines = []; let line = '';
+  for (const w of words) { const t = line ? line + ' ' + w : w; if (ctx.measureText(t).width > maxW && line) { lines.push(line); line = w; } else line = t; }
+  if (line) lines.push(line); return lines;
+}
+
+/** Draws the page; returns the tappable segments [{rect, section, value}]. */
+function drawSettings(ctx, base, mode, sections) {
+  const p = PAL[mode], hits = [];
+  ctx.fillStyle = p.bg; ctx.fillRect(0, 0, 480, 800);
+  ctx.drawImage(base, 0, 0, 480, 140, 0, 0, 480, 140);   // real status bar and back arrow
+  ctx.fillStyle = p.title; ctx.font = `600 37px ${UI}`; ctx.textAlign = 'left';
+  ctx.fillText('ClearWind', 23, 196);
+  let y = 279;                                             // first heading baseline
+  sections.forEach((s, i) => {
+    if (i > 0) { ctx.fillStyle = p.div; ctx.fillRect(22, y - 64, 436, 1.5); }
+    s.icon(ctx, 24, y - 26, 32, p.title);
+    ctx.fillStyle = p.title; ctx.font = `500 31px ${UI}`; ctx.textAlign = 'left';
+    ctx.fillText(s.title, 75, y);
+    // Segmented control
+    const tx = 22, ty = y + 29, tw = 436, th = 78, n = s.options.length, sw = (tw - 6) / n;
+    ctx.fillStyle = p.track; ctx.beginPath(); ctx.roundRect(tx, ty, tw, th, th / 2); ctx.fill();
+    s.options.forEach(([label, value], k) => {
+      const r = [tx + 3 + k * sw, ty + 3, sw, th - 6];
+      if (value === s.value) { ctx.fillStyle = p.sel; ctx.beginPath(); ctx.roundRect(...r, (th - 6) / 2); ctx.fill(); }
+      ctx.fillStyle = p.seg; ctx.font = `500 ${n > 3 ? 23 : 24}px ${UI}`; ctx.textAlign = 'center';
+      ctx.fillText(label, r[0] + sw / 2, ty + 48);
+      hits.push({ rect: r, section: s.key, value });
+    });
+    // Help text
+    ctx.fillStyle = p.help; ctx.font = `500 22px ${UI}`; ctx.textAlign = 'left';
+    const lines = wrap(ctx, s.help, 436);
+    lines.forEach((l, j) => ctx.fillText(l, 23, ty + th + 46 + j * 32));
+    // Next section: same gaps as the Karoo (help → divider 34 px, divider → heading 64 px)
+    y = ty + th + 46 + (lines.length - 1) * 32 + 34 + 64;
+  });
+  return hits;
+}
+
+/* ---------- The two options ---------- */
+
+const KAROO_UNITS = 'kmh';    // what "Auto" resolves to on a metric Karoo (mph on an imperial one)
+const OPTIONS = [
+  { tag: 'A', units: [['m/s','ms'], ['km/h','kmh'], ['mph','mph'], ['kn','kn']],
+    help: 'A remote button can also switch it during a ride.' },
+  { tag: 'B', units: [['Auto','auto'], ['m/s','ms'], ['km/h','kmh'], ['mph','mph']],
+    help: 'Auto follows the Karoo’s own units: km/h or mph.' },
+];
+const COLOUR_OPTIONS = [['Speed','speed'], ['Plain','mono'], ['Green','green']];
+const COLOUR_HELP = 'Speed goes from green to red as the wind picks up. Tap the field during a ride to switch.';
+
+const loadImg = src => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.src = src; });
+
+(async () => {
+  await Promise.all([document.fonts.load(`600 37px ${UI}`), document.fonts.load(`500 22px ${UI}`), document.fonts.load(HEADER_FONT)]);
+  const base = { light: await loadImg(BASE.light), dark: await loadImg(BASE.dark) };
+  const dev = await KarooDevice.load({ frame: FRAME, screen: BASE.light });
+  const stage = document.getElementById('stage');
+
+  for (const opt of OPTIONS) {
+    const state = { unit: opt.units[0][1], colour: 'speed' };
+    const box = document.createElement('div'); box.className = 'option';
+    const tag = document.createElement('div'); tag.className = 'tag'; tag.textContent = opt.tag;
+    const row = document.createElement('div'); row.className = 'row';
+    box.append(tag, row); stage.append(box);
+
+    const render = () => {
+      row.replaceChildren();
+      for (const mode of ['light', 'dark']) {
+        let hits = [];
+        const scr = dev.screen({ scale: 2, draw: ctx => {
+          hits = drawSettings(ctx, base[mode], mode, [
+            { key: 'unit', title: 'Wind speed unit', icon: windHeadingIcon, options: opt.units, value: state.unit, help: opt.help },
+            { key: 'colour', title: 'Arrow colour', icon: arrowIcon, options: COLOUR_OPTIONS, value: state.colour, help: COLOUR_HELP },
+          ]);
+        } });
+        const c = dev.device(scr, 300); c.className = 'dev';
+        c.addEventListener('click', e => {
+          const k = 300 / 1100, r = c.getBoundingClientRect();
+          const sx = ((e.clientX - r.left) / k - 177) * 480 / 745, sy = ((e.clientY - r.top) / k - 215) * 800 / 1232;
+          const h = hits.find(({ rect: [x, y, w, hh] }) => sx >= x && sx <= x + w && sy >= y && sy <= y + hh);
+          if (h) { state[h.section] = h.value; render(); }
+        });
+        row.append(c);
+      }
+      // The field with the chosen settings, light and dark
+      const tiles = document.createElement('div'); tiles.className = 'tiles';
+      for (const mode of ['light', 'dark']) {
+        const t = document.createElement('canvas'), dpr = window.devicePixelRatio || 1;
+        t.width = 238 * dpr; t.height = 142 * dpr; t.style.width = '238px'; t.style.height = '142px';
+        const tc = t.getContext('2d'); tc.scale(dpr, dpr);
+        drawField(tc, 238, 142, { dark: mode === 'dark', ms: 5.2, deg: 45, colour: state.colour, unit: state.unit === 'auto' ? KAROO_UNITS : state.unit });
+        tiles.append(t);
+      }
+      row.append(tiles);
+    };
+    render();
+  }
+})();
+</script>
+</body>
+</html>
