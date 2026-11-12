@@ -1,5 +1,7 @@
 package com.daviddokakis.clearwind
 
+import com.dubadai.karoo.common.*
+
 import android.content.Context
 import android.os.SystemClock
 import io.hammerhead.karooext.KarooSystemService
